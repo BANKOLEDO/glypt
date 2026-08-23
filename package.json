@@ -1,0 +1,26 @@
+{
+  "name": "glypt",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev:web": "pnpm --filter @glypt/web dev",
+    "dev:api": "pnpm --filter @glypt/api dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "mcp": "pnpm --filter @glypt/mcp start",
+    "glypt": "pnpm --filter @glypt/cli start",
+    "test": "vitest run tests/unit tests/integration",
+    "test:unit": "vitest run tests/unit",
+    "test:integration": "vitest run tests/integration",
+    "test:e2e": "node tests/e2e/e2e.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "tsx": "^4.23.12",
+    "typescript": "^5",
+    "vitest": "^3.2.4"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild", "@swc/core"]
+  }
+}
