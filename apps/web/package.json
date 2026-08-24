@@ -1,0 +1,32 @@
+{
+  "name": "@glypt/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "start": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@glypt/core": "workspace:*",
+    "@iconify/react": "^6.0.2",
+    "clsx": "^2.1.1",
+    "lottie-react": "^3.1.0",
+    "motion": "^13.1.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-router-dom": "^7.9.6"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@vitejs/plugin-react-swc": "^4.2.2",
+    "tailwindcss": "^4",
+    "typescript": "^5",
+    "vite": "^7.3.0"
+  }
+}
