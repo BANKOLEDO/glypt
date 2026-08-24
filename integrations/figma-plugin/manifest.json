@@ -1,0 +1,14 @@
+{
+  "name": "Glypt Icons",
+  "id": "glypt-icons",
+  "api": "1.0.0",
+  "main": "code.js",
+  "editorType": ["figma"],
+  "networkAccess": {
+    "allowedDomains": [
+      "https://*",
+      "http://localhost",
+      "http://127.0.0.1"
+    ]
+  }
+}
