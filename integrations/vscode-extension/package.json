@@ -1,0 +1,42 @@
+{
+  "name": "glypt-vscode",
+  "displayName": "Glypt",
+  "publisher": "glypt",
+  "description": "Search 200k+ icons and insert React, Vue, or SVG URL snippets without leaving your editor.",
+  "version": "0.1.0",
+  "icon": false,
+  "engines": { "vscode": "^1.85.0" },
+  "categories": ["Programming Languages", "Snippets"],
+  "keywords": ["icons", "svg", "design", "brand", "assets"],
+  "activationEvents": [],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "glypt.insertIcon",
+        "title": "Glypt: Insert icon",
+        "icon": "$(paintcan)"
+      },
+      {
+        "command": "glypt.setApiBase",
+        "title": "Glypt: Set API base URL"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "glypt.insertIcon",
+        "key": "alt+shift+i"
+      }
+    ],
+    "configuration": {
+      "title": "Glypt",
+      "properties": {
+        "glypt.apiBase": {
+          "type": "string",
+          "default": "http://localhost:4000",
+          "description": "Base URL of the Glypt API (falls back to the Iconify CDN for search)."
+        }
+      }
+    }
+  }
+}
