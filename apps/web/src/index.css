@@ -1,0 +1,172 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "Basier Square";
+  src: url("/fonts/basiersquare-regular-webfont.woff2") format("woff2"),
+    url("/fonts/basiersquare-regular-webfont.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@theme {
+  --font-body: "Basier Square", "Segoe UI", sans-serif;
+  --font-display: "Basier Square", "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-brand: "Martian Mono", ui-monospace, monospace;
+
+  --color-paper: #fff6ec;
+  --color-card: #ffffff;
+  --color-ink: #221b15;
+  --color-mute: #8a7e72;
+  --color-line: #ecdfd0;
+
+  --color-tang: #ff5a1f;
+  --color-tang-hi: #e8480d;
+  --color-tang-soft: #ffe3d6;
+  --color-berry: #f23d97;
+  --color-berry-soft: #ffdcf0;
+  --color-mint: #00c389;
+  --color-mint-soft: #d6f5e7;
+  --color-citrine: #ffc531;
+  --color-citrine-soft: #fff0c7;
+  --color-sky: #35a4ff;
+  --color-sky-soft: #dbeeff;
+
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+
+  --animate-marquee: marquee 28s linear infinite;
+  --animate-caret: caret 1s steps(1) infinite;
+  --animate-float: floaty 6s ease-in-out infinite;
+  --animate-float-late: floaty 7s ease-in-out -3s infinite;
+  --animate-spin-slow: spin 14s linear infinite;
+
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+  @keyframes caret {
+    0%,
+    49% {
+      opacity: 1;
+    }
+    50%,
+    100% {
+      opacity: 0;
+    }
+  }
+  @keyframes floaty {
+    0%,
+    100% {
+      transform: translateY(0) rotate(var(--tilt, 0deg));
+    }
+    50% {
+      transform: translateY(-10px) rotate(var(--tilt, 0deg));
+    }
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--color-citrine);
+  color: var(--color-ink);
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--color-line);
+  border-radius: 999px;
+}
+
+:focus-visible:not([data-suppress-focus]) {
+  outline: 3px solid var(--color-tang);
+  outline-offset: 2px;
+}
+
+.dot-bg {
+  background-image: radial-gradient(rgba(34, 27, 21, 0.08) 1.5px, transparent 1.5px);
+  background-size: 22px 22px;
+}
+
+.scrollbar-none {
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+@layer components {
+  .label-mono {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-mute);
+  }
+
+  .btn-primary {
+    @apply btn bg-tang text-white shadow-[0_8px_20px_-8px_rgba(255,90,31,0.55)]
+      hover:bg-tang-hi hover:-translate-y-0.5 active:translate-y-0;
+  }
+
+  .btn-ghost {
+    @apply btn border-2 border-ink/15 bg-white text-ink
+      hover:border-ink hover:-translate-y-0.5 active:translate-y-0;
+  }
+
+  .card {
+    @apply relative overflow-hidden rounded-lg bg-card ring-1 ring-line
+      transition-all duration-200;
+  }
+
+  .card-hover {
+    @apply hover:-translate-y-1 hover:shadow-[0_18px_40px_-18px_rgba(34,27,21,0.28)];
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-line
+      bg-white px-3 py-1 font-mono text-[11px] tracking-wide text-mute;
+  }
+
+  .sticker {
+    @apply inline-flex items-center gap-1 rounded-full px-3 py-1 font-mono
+      text-[11px] font-bold tracking-wide uppercase;
+    box-shadow: 3px 3px 0 0 var(--color-ink);
+  }
+
+  .input {
+    @apply w-full rounded-md border-2 border-line bg-white px-4 py-3 text-sm
+      text-ink placeholder:text-mute/70 transition-colors
+      focus:border-tang focus:outline-none;
+  }
+
+  .h-display {
+    @apply font-display font-bold tracking-tight text-ink;
+    letter-spacing: -0.03em;
+  }
+}
+
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3
+    text-sm font-bold transition-all duration-150 cursor-pointer select-none;
+}
