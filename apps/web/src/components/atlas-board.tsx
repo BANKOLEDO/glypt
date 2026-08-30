@@ -96,7 +96,7 @@ export function AtlasBoard({ cols = 4 }: { cols?: number }) {
 
   if (loading) {
     return (
-      <div className="grid grid-cols-4 gap-2 sm:gap-3" aria-busy>
+      <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-3" aria-busy>
         {Array.from({ length: 12 }).map((_, i) => (
           <div
             key={i}
@@ -116,7 +116,7 @@ export function AtlasBoard({ cols = 4 }: { cols?: number }) {
         tabIndex={0}
         onKeyDown={onKeyDown}
         data-suppress-focus
-        className="grid grid-cols-4 gap-2 rounded-xl outline-none sm:gap-3 sm:[grid-template-columns:repeat(var(--cols),minmax(0,1fr))]"
+        className="grid grid-cols-3 gap-2 rounded-xl outline-none sm:grid-cols-none sm:gap-3 sm:[grid-template-columns:repeat(var(--cols),minmax(0,1fr))]"
         style={{ "--cols": Math.min(cols, 6) } as React.CSSProperties}
       >
         {cells.map((cell, i) => (
@@ -143,13 +143,13 @@ export function AtlasBoard({ cols = 4 }: { cols?: number }) {
             title={`${cell.ref} → ${cell.id}`}
             tabIndex={-1}
           >
-            <span className="absolute top-1.5 right-0 left-0 text-center font-mono text-[9px] font-bold text-mute transition-colors group-hover:text-tang sm:text-[10px]">
+            <span className="absolute top-1.5 right-2 left-2 truncate text-center font-mono text-[9px] font-bold text-mute transition-colors group-hover:text-tang sm:right-0 sm:left-0 sm:text-[10px]">
               {cell.ref}
             </span>
             <div className="absolute inset-0 mt-1.5 grid place-items-center">
               <Iconify
                 icon={cell.id}
-                className="size-5 text-ink transition-transform group-hover:scale-110 sm:size-7"
+                className="size-6 text-ink transition-transform group-hover:scale-110 sm:size-7"
                 aria-hidden
               />
             </div>
