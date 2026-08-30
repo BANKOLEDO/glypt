@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
 import clsx from "clsx";
@@ -19,14 +19,34 @@ export function Nav() {
   const pathname = location.pathname;
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
 
   // close the sheet whenever the route changes
   useEffect(() => {
     setOpen(false);
   }, [pathname]);
 
+  // auto-close when tapping outside the header or pressing Escape
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      if (headerRef.current && !headerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
   return (
-    <header className="sticky top-0 z-50 px-3 pt-3 sm:px-5 sm:pt-4">
+    <header ref={headerRef} className="sticky top-0 z-50 px-3 pt-3 sm:px-5 sm:pt-4">
       <div className="mx-auto flex h-14 max-w-7xl items-center gap-3 rounded-full border border-line bg-white/90 pl-4 pr-2 shadow-[0_10px_30px_-18px_rgba(34,27,21,0.35)] backdrop-blur sm:pl-5">
         <Link to="/" className="flex shrink-0 items-center gap-2.5" aria-label="Glypt home">
           <span className="grid size-8 place-items-center rounded-xl bg-tang font-brand text-[13px] font-bold text-white shadow-[3px_3px_0_0_var(--color-ink)]">
