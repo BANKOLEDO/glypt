@@ -14,10 +14,10 @@ const MCP_SNIPPET = `{
 export default function Atlas() {
   usePageTitle("Visual Atlas · Glypt");
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div className="flex min-h-dvh flex-col overflow-x-clip">
       <Nav />
       <main className="mx-auto grid w-full max-w-7xl flex-1 gap-10 px-5 py-12 lg:grid-cols-[1.2fr_1fr]">
-        <div>
+        <div className="min-w-0">
           <p className="label-mono">atlas /</p>
           <h1 className="h-display mt-3 text-4xl sm:text-5xl">
             LOOK BEFORE YOU LEAP<span className="text-tang">.</span>
@@ -27,15 +27,15 @@ export default function Atlas() {
             an agent inspects it, picks “B2”, and one call maps the reference
             back to the real asset ID.
           </p>
-          <div className="mt-8 max-w-xl">
+          <div className="card mt-8 bg-white p-5">
             <AtlasBoard cols={4} />
           </div>
         </div>
 
-        <aside className="space-y-4">
+        <aside className="min-w-0 space-y-4">
           <div className="card p-5">
             <p className="label-mono">agent call · visual_select</p>
-            <pre className="mt-3 overflow-x-auto rounded-lg bg-ink p-4 font-mono text-[11px] leading-relaxed text-mint">
+            <pre className="mt-3 overflow-x-auto rounded-lg bg-ink p-4 font-mono text-[11px] leading-relaxed text-mint whitespace-pre-wrap break-words">
               {MCP_SNIPPET}
             </pre>
           </div>
