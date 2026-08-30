@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import clsx from "clsx";
@@ -138,7 +138,7 @@ function Code({ children }: { children: string }) {
   const [copied, setCopied] = useState(false);
   return (
     <div className="group relative">
-      <pre className="overflow-x-auto rounded-lg bg-ink p-4 font-mono text-[11px] leading-relaxed text-mint">
+      <pre className="overflow-x-auto rounded-lg bg-ink p-4 font-mono text-[11px] leading-relaxed text-mint whitespace-pre-wrap break-words">
         {children}
       </pre>
       <button
@@ -149,7 +149,7 @@ function Code({ children }: { children: string }) {
             setTimeout(() => setCopied(false), 1500);
           } catch { /* blocked */ }
         }}
-        className="absolute top-2 right-2 rounded-md bg-white/10 px-2 py-1 font-mono text-[10px] text-white/70 opacity-0 transition-opacity group-hover:opacity-100"
+        className="absolute right-2 bottom-2 rounded-md bg-white/10 px-2 py-1 font-mono text-[10px] text-white/70 transition-opacity sm:top-2 sm:bottom-auto sm:opacity-0 sm:group-hover:opacity-100"
       >
         {copied ? "copied ✓" : "copy"}
       </button>
@@ -193,10 +193,27 @@ export default function Docs() {
   usePageTitle("Docs · Glypt");
   const [active, setActive] = useState("quickstart");
 
+  // scroll-spy: highlight whichever section is on screen
+  useEffect(() => {
+    const ids = TOC.map(([id]) => id);
+    const probe = Math.min(240, Math.max(150, window.innerHeight * 0.3));
+    const onScroll = () => {
+      let current = ids[0]!;
+      for (const id of ids) {
+        const el = document.getElementById(id);
+        if (el && el.getBoundingClientRect().top <= probe) current = id;
+      }
+      setActive(current);
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div className="flex min-h-dvh flex-col overflow-x-clip">
       <Nav />
-      <main className="mx-auto grid w-full max-w-7xl flex-1 gap-10 px-5 py-12 lg:grid-cols-[220px_1fr]">
+      <main className="mx-auto grid w-full max-w-7xl flex-1 gap-10 px-5 pb-28 py-12 lg:grid-cols-[220px_1fr] lg:pb-12">
         {/* toc */}
         <aside className="hidden lg:block">
           <p className="label-mono mb-3">reference</p>
@@ -218,14 +235,29 @@ export default function Docs() {
           </nav>
         </aside>
 
-        {/* mobile section jump */}
-        <div className="-mx-5 overflow-x-auto px-5 scrollbar-none lg:hidden">
-          <div className="flex w-max gap-2 pb-1">
+        {/* mobile bottom section navigator */}
+        <nav
+          aria-label="Sections"
+          className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-white/95 backdrop-blur lg:hidden"
+        >
+          <div className="flex gap-1.5 overflow-x-auto px-3 py-2.5 scrollbar-none">
             {TOC.map(([id, label]) => (
-              <a key={id} href={`#${id}`} className="chip whitespace-nowrap hover:!text-ink">{label}</a>
+              <a
+                key={id}
+                href={`#${id}`}
+                onClick={() => setActive(id)}
+                className={clsx(
+                  "whitespace-nowrap rounded-full px-3 py-1.5 font-mono text-[11px] font-bold tracking-wide transition-colors",
+                  active === id
+                    ? "bg-ink text-white shadow-[2px_2px_0_0_var(--color-citrine)]"
+                    : "bg-paper text-mute hover:text-ink",
+                )}
+              >
+                {label}
+              </a>
             ))}
           </div>
-        </div>
+        </nav>
 
         <article className="min-w-0 space-y-14">
           <header>
@@ -296,22 +328,32 @@ export default function Docs() {
           {/* errors */}
           <section id="errors" className="scroll-mt-28">
             <h2 className="h-display text-2xl">ERRORS</h2>
-            <div className="card mt-4 overflow-x-auto p-0 ring-0">
-              <table className="w-full min-w-[480px] text-left text-sm">
-                <thead>
-                  <tr className="border-b border-line font-mono text-[10px] tracking-widest text-mute uppercase">
-                    <th className="px-4 py-3">status</th><th className="px-4 py-3">meaning</th>
-                  </tr>
-                </thead>
-                <tbody className="[&_td]:px-4 [&_td]:py-3 [&_tr]:border-b [&_tr:last-child]:border-0 [&_tr]:border-line">
-                  <tr><td><code className="font-mono font-bold text-mint">200</code></td><td className="text-mute">All good.</td></tr>
-                  <tr><td><code className="font-mono font-bold text-citrine-hi">201</code></td><td className="text-mute">Created (folders, shares, accounts).</td></tr>
-                  <tr><td><code className="font-mono font-bold text-berry">400</code></td><td className="text-mute">Validation failed: bad id format, weak password.</td></tr>
-                  <tr><td><code className="font-mono font-bold text-berry">401</code> / <code className="font-mono font-bold text-berry">403</code></td><td className="text-mute">Not signed in / not allowed (bad key, foreign origin).</td></tr>
-                  <tr><td><code className="font-mono font-bold text-berry">404</code></td><td className="text-mute">Unknown resource or expired share token.</td></tr>
-                  <tr><td><code className="font-mono font-bold text-berry">429</code></td><td className="text-mute">Daily quota reached or rate limit hit. Back off until reset.</td></tr>
-                </tbody>
-              </table>
+            <div className="card mt-4 overflow-hidden p-0 ring-0">
+              <div className="hidden overflow-x-auto sm:block">
+                <table className="w-full min-w-[480px] text-left text-sm">
+                  <thead>
+                    <tr className="border-b border-line font-mono text-[10px] tracking-widest text-mute uppercase">
+                      <th className="px-4 py-3">status</th><th className="px-4 py-3">meaning</th>
+                    </tr>
+                  </thead>
+                  <tbody className="[&_td]:px-4 [&_td]:py-3 [&_tr]:border-b [&_tr:last-child]:border-0 [&_tr]:border-line">
+                    <tr><td><code className="font-mono font-bold text-mint">200</code></td><td className="text-mute">All good.</td></tr>
+                    <tr><td><code className="font-mono font-bold text-citrine-hi">201</code></td><td className="text-mute">Created (folders, shares, accounts).</td></tr>
+                    <tr><td><code className="font-mono font-bold text-berry">400</code></td><td className="text-mute">Validation failed: bad id format, weak password.</td></tr>
+                    <tr><td><code className="font-mono font-bold text-berry">401</code> / <code className="font-mono font-bold text-berry">403</code></td><td className="text-mute">Not signed in / not allowed (bad key, foreign origin).</td></tr>
+                    <tr><td><code className="font-mono font-bold text-berry">404</code></td><td className="text-mute">Unknown resource or expired share token.</td></tr>
+                    <tr><td><code className="font-mono font-bold text-berry">429</code></td><td className="text-mute">Daily quota reached or rate limit hit. Back off until reset.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <ul className="divide-y divide-line sm:hidden">
+                <li className="flex gap-3 px-4 py-3"><code className="w-12 shrink-0 font-mono font-bold text-mint">200</code><span className="text-sm text-mute">All good.</span></li>
+                <li className="flex gap-3 px-4 py-3"><code className="w-12 shrink-0 font-mono font-bold text-citrine-hi">201</code><span className="text-sm text-mute">Created (folders, shares, accounts).</span></li>
+                <li className="flex gap-3 px-4 py-3"><code className="w-12 shrink-0 font-mono font-bold text-berry">400</code><span className="text-sm text-mute">Validation failed: bad id format, weak password.</span></li>
+                <li className="flex gap-3 px-4 py-3"><code className="w-12 shrink-0 font-mono font-bold text-berry">401/403</code><span className="text-sm text-mute">Not signed in / not allowed (bad key, foreign origin).</span></li>
+                <li className="flex gap-3 px-4 py-3"><code className="w-12 shrink-0 font-mono font-bold text-berry">404</code><span className="text-sm text-mute">Unknown resource or expired share token.</span></li>
+                <li className="flex gap-3 px-4 py-3"><code className="w-12 shrink-0 font-mono font-bold text-berry">429</code><span className="text-sm text-mute">Daily quota reached or rate limit hit. Back off until reset.</span></li>
+              </ul>
             </div>
           </section>
 
