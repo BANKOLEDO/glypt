@@ -1,15 +1,16 @@
+import { lazy, Suspense, useEffect } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
-import { useEffect } from "react";
-import Home from "./pages/Home";
-import Search from "./pages/Search";
-import Atlas from "./pages/Atlas";
-import Brands from "./pages/Brands";
-import Dashboard from "./pages/Dashboard";
-import Market from "./pages/Market";
-import Docs from "./pages/Docs";
-import Shared from "./pages/Shared";
-import SignIn from "./pages/SignIn";
-import NotFound from "./pages/NotFound";
+
+const Home = lazy(() => import("./pages/Home"));
+const Search = lazy(() => import("./pages/Search"));
+const Atlas = lazy(() => import("./pages/Atlas"));
+const Brands = lazy(() => import("./pages/Brands"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Market = lazy(() => import("./pages/Market"));
+const Docs = lazy(() => import("./pages/Docs"));
+const Shared = lazy(() => import("./pages/Shared"));
+const SignIn = lazy(() => import("./pages/SignIn"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -19,21 +20,29 @@ function ScrollToTop() {
   return null;
 }
 
+function PageFallback() {
+  return (
+    <div className="grid min-h-dvh place-items-center bg-paper" aria-busy>
+      <span className="size-8 animate-spin rounded-full border-2 border-line border-t-ink" />
+    </div>
+  );
+}
+
 export default function App() {
   return (
     <>
       <ScrollToTop />
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/search" element={<Search />} />
-        <Route path="/atlas" element={<Atlas />} />
-        <Route path="/brands" element={<Brands />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/market" element={<Market />} />
-        <Route path="/docs" element={<Docs />} />
-        <Route path="/s/:token" element={<Shared />} />
-        <Route path="/signin" element={<SignIn />} />
-        <Route path="*" element={<NotFound />} />
+        <Route path="/" element={<Suspense fallback={<PageFallback />}><Home /></Suspense>} />
+        <Route path="/search" element={<Suspense fallback={<PageFallback />}><Search /></Suspense>} />
+        <Route path="/atlas" element={<Suspense fallback={<PageFallback />}><Atlas /></Suspense>} />
+        <Route path="/brands" element={<Suspense fallback={<PageFallback />}><Brands /></Suspense>} />
+        <Route path="/dashboard" element={<Suspense fallback={<PageFallback />}><Dashboard /></Suspense>} />
+        <Route path="/market" element={<Suspense fallback={<PageFallback />}><Market /></Suspense>} />
+        <Route path="/docs" element={<Suspense fallback={<PageFallback />}><Docs /></Suspense>} />
+        <Route path="/s/:token" element={<Suspense fallback={<PageFallback />}><Shared /></Suspense>} />
+        <Route path="/signin" element={<Suspense fallback={<PageFallback />}><SignIn /></Suspense>} />
+        <Route path="*" element={<Suspense fallback={<PageFallback />}><NotFound /></Suspense>} />
       </Routes>
     </>
   );
