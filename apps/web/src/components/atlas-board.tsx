@@ -116,7 +116,7 @@ export function AtlasBoard({ cols = 4 }: { cols?: number }) {
         tabIndex={0}
         onKeyDown={onKeyDown}
         data-suppress-focus
-        className="grid grid-cols-3 gap-2 rounded-xl outline-none sm:grid-cols-none sm:gap-3 sm:[grid-template-columns:repeat(var(--cols),minmax(0,1fr))]"
+        className="grid grid-cols-3 gap-2 rounded-xl outline-none sm:gap-3 sm:grid-cols-[repeat(var(--cols),minmax(0,1fr))]"
         style={{ "--cols": Math.min(cols, 6) } as React.CSSProperties}
       >
         {cells.map((cell, i) => (
