@@ -50,8 +50,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (SKIP.has(key)) continue;
     res.setHeader(key, value);
   }
-  const getSetCookie = (up.headers as Headers & { getSetCookie?: () => string[] }).getSetCookie;
-  const cookies = getSetCookie ? getSetCookie() : [];
+  const cookies = typeof up.headers.getSetCookie === "function" ? up.headers.getSetCookie() : [];
   if (cookies.length) res.setHeader("Set-Cookie", cookies);
   res.setHeader("Content-Length", buf.byteLength);
   res.send(buf);
