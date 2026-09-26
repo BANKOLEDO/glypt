@@ -11,6 +11,15 @@ const SKIP = new Set([
 ]);
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  try {
+    await run(req, res);
+  } catch (e) {
+    console.error("proxy error:", e);
+    res.status(500).json({ error: String((e as Error).message ?? e) });
+  }
+}
+
+async function run(req: VercelRequest, res: VercelResponse) {
   const origin = process.env.API_ORIGIN;
   if (!origin) {
     res.status(503).json({ error: "API_ORIGIN not configured" });
