@@ -1,11 +1,30 @@
+import { Navigate } from "react-router-dom";
 import Nav from "../components/nav";
 import CollectionsManager from "../components/collections-manager";
+import { useAuth } from "../lib/auth";
 import { usePageTitle } from "../lib/usePageTitle";
 
 export default function Dashboard() {
   usePageTitle("Dashboard · Glypt");
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="flex min-h-dvh flex-col">
+        <Nav />
+        <main className="grid flex-1 place-items-center px-5">
+          <span className="size-8 animate-spin rounded-full border-2 border-line border-t-tang" aria-busy />
+        </main>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/signin?next=/dashboard" replace />;
+  }
+
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div className="flex min-h-dvh flex-col overflow-x-clip">
       <Nav />
       <main className="mx-auto w-full max-w-7xl flex-1 px-5 py-12">
         <p className="label-mono">dashboard /</p>
@@ -17,7 +36,7 @@ export default function Dashboard() {
           your account, safe to collaborate on.
         </p>
         <div className="mt-8">
-          <CollectionsManager />
+          <CollectionsManager user={user} />
         </div>
       </main>
     </div>
