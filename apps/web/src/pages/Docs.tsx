@@ -6,6 +6,8 @@ import Nav from "../components/nav";
 import { usePageTitle } from "../lib/usePageTitle";
 
 const TOC = [
+  ["overview", "Overview", "ph:compass-bold"],
+  ["concepts", "Core concepts", "ph:lightning-bold"],
   ["quickstart", "Quickstart", "ph:rocket-launch-bold"],
   ["authentication", "Authentication", "ph:identification-badge-bold"],
   ["api", "REST API", "ph:plugs-connected-bold"],
@@ -268,6 +270,76 @@ export default function Docs() {
               origin: <code className="rounded bg-paper px-1.5 py-0.5 font-mono text-xs text-ink">http://localhost:4000</code> locally.
             </p>
           </header>
+
+          {/* overview */}
+          <section id="overview" className="scroll-mt-28">
+            <h2 className="h-display text-2xl">
+              WHAT IS GLYPT<span className="text-tang">.</span>
+            </h2>
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-mute">
+              Glypt is a visual asset platform for icons and brand kits. Text
+              search finds any of 200k+ icons, the atlas turns them into a
+              labeled visual grid an agent can pick from, and exports hand you
+              production-ready code in react, vue or raw svg. Every step is
+              built for two audiences at once: people clicking in a browser and
+              AI agents calling an API.
+            </p>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              {[
+                ["ph:magnifying-glass-bold", "Search everything", "200k+ icons across 150+ collections. One query returns ids ready for snippets or rendering."],
+                ["ph:grid-nine-bold", "Pick by reference", "The atlas labels candidates as A1, B3, C2 so anyone, even an agent, can point at the right glyph instead of guessing."],
+                ["ph:archive-bold", "One-click export", "Copy an import, download a ZIP, or render react/vue/svg output that drops into your codebase."],
+                ["ph:puzzle-piece-bold", "Works everywhere", "REST API, CLI, MCP server for agents, a Python SDK, plus browser, Figma and VS Code integrations."],
+              ].map(([ic, t, d]) => (
+                <div key={t as string} className="card p-5 ring-0">
+                  <span className="grid size-10 place-items-center rounded-xl bg-tang-soft text-tang">
+                    <Icon icon={ic as string} className="size-5" aria-hidden />
+                  </span>
+                  <p className="font-display mt-3 font-bold text-ink">{t}</p>
+                  <p className="mt-1.5 text-sm leading-relaxed text-mute">{d}</p>
+                </div>
+              ))}
+            </div>
+            <div className="card mt-4 bg-ink !ring-0 p-5">
+              <p className="label-mono !text-white/50">the pipeline</p>
+              <ol className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-2 font-mono text-[11px] font-bold tracking-wide text-mint uppercase">
+                <li className="rounded-full bg-white/10 px-3 py-1.5">search</li>
+                <li aria-hidden className="text-white/40">→</li>
+                <li className="rounded-full bg-white/10 px-3 py-1.5">atlas</li>
+                <li aria-hidden className="text-white/40">→</li>
+                <li className="rounded-full bg-white/10 px-3 py-1.5">resolve</li>
+                <li aria-hidden className="text-white/40">→</li>
+                <li className="rounded-full bg-white/10 px-3 py-1.5">export</li>
+                <li aria-hidden className="text-white/40">→</li>
+                <li className="rounded-full bg-tang px-3 py-1.5 text-white">ship</li>
+              </ol>
+            </div>
+          </section>
+
+          {/* core concepts */}
+          <section id="concepts" className="scroll-mt-28">
+            <h2 className="h-display text-2xl">CORE CONCEPTS</h2>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              {[
+                ["ph:hash-bold", "Icon ids", <>Every icon is <code className="rounded bg-paper px-1.5 font-mono text-xs text-ink">prefix:name</code>. Prefix is the collection, name is the glyph: <code className="rounded bg-paper px-1.5 font-mono text-xs text-ink">lucide:home</code>, <code className="rounded bg-paper px-1.5 font-mono text-xs text-ink">ph:star</code>.</>],
+                ["ph:crosshair-bold", "Atlas references", "A board maps candidates to opaque refs (A1, B3). Agents inspect the visual grid, choose a ref, and resolve it back to a real asset id in one call."],
+                ["ph:identification-badge-bold", "Identity", "A device cookie is issued automatically on first search, so anonymous visitors get quota, favorites and atlases. Signing in adds folders, brand saves and sync."],
+                ["ph:folder-simple-bold", "Collections & shares", "Save icons into colored folders, create share links for teammates, and export any folder as a ZIP with code snippets per format."],
+                ["ph:gauge-bold", "Free quota", "Every device gets 100 searches a day, resetting at midnight UTC. The x-quota-remaining header always tells you where you stand."],
+                ["ph:repeat-bold", "Deterministic output", "Same inputs, same results: atlases are reproducible and exports are stable, so automations can rely on them day after day."],
+              ].map(([ic, t, d]) => (
+                <div key={t as string} className="card p-5 ring-0">
+                  <div className="flex items-center gap-2">
+                    <span className="grid size-8 place-items-center rounded-lg bg-sky-soft text-sky">
+                      <Icon icon={ic as string} className="size-4" aria-hidden />
+                    </span>
+                    <p className="font-display font-bold text-ink">{t}</p>
+                  </div>
+                  <p className="mt-2.5 text-sm leading-relaxed text-mute">{d}</p>
+                </div>
+              ))}
+            </div>
+          </section>
 
           {/* quickstart */}
           <section id="quickstart" className="scroll-mt-28">
