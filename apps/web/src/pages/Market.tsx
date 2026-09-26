@@ -37,7 +37,7 @@ export default function Market() {
           {collections.map((c) => (
             <Link
               key={c.prefix}
-              to={`/search?q=${encodeURIComponent(c.name.split(" ")[0])}`}
+              to={`/search?q=${encodeURIComponent(c.prefix)}`}
               className={`group bg-white p-5 transition-colors hover:bg-paper ${FEATURED.includes(c.prefix) ? "border-l-4 border-l-tang" : ""}`}
             >
               <div className="flex items-center justify-between gap-3">

@@ -1,9 +1,12 @@
+import { useSearchParams } from "react-router-dom";
 import Nav from "../components/nav";
 import IconExplorer from "../components/icon-explorer";
 import { usePageTitle } from "../lib/usePageTitle";
 
 export default function Search() {
   usePageTitle("Search · Glypt");
+  const [params] = useSearchParams();
+  const query = params.get("q") ?? "";
   return (
     <div className="flex min-h-dvh flex-col">
       <Nav />
@@ -13,7 +16,7 @@ export default function Search() {
           FIND THE GLYPH<span className="text-tang">.</span>
         </h1>
         <div className="mt-8">
-          <IconExplorer initialQuery="" />
+          <IconExplorer initialQuery={query} />
         </div>
         <section className="mt-14 grid gap-4 border-t-2 border-line pt-10 md:grid-cols-3">
           {[
