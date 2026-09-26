@@ -10,7 +10,15 @@ const SKIP = new Set([
   "set-cookie",
 ]);
 
-const REQ_SKIP = new Set(["connection", "keep-alive", "transfer-encoding", "content-length", "host", "upgrade"]);
+const REQ_SKIP = new Set([
+  "connection",
+  "keep-alive",
+  "transfer-encoding",
+  "content-length",
+  "host",
+  "upgrade",
+  "expect",
+]);
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
