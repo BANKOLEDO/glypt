@@ -33,12 +33,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const init: RequestInit = { method: req.method ?? "GET", headers };
   if (req.method !== "GET" && req.method !== "HEAD") {
-    const readBody = (req as unknown as { readBody?: () => Promise<Buffer> }).readBody;
-    if (readBody) {
-      const raw = await readBody();
-      if (raw.byteLength > 0) init.body = raw;
-    } else if (req.body !== undefined && req.body !== "") {
+    if (req.body !== undefined && req.body !== "") {
       init.body = Buffer.from(typeof req.body === "string" ? req.body : JSON.stringify(req.body));
+    } else {
+      try {
+        const raw = await (req as unknown as { readBody?: () => Promise<Buffer> }).readBody?.();
+        if (raw && raw.byteLength > 0) init.body = raw;
+      } catch {
+        // body already consumed by the platform parser
+      }
     }
   }
 
