@@ -41,8 +41,10 @@ const FRAMES = {
 
 export type FrameKind = keyof typeof FRAMES;
 
+// frame an https url or data:image uri in browser/phone chrome
 export function mockupSvg(imageUrl: string, kind: FrameKind = "browser"): string | null {
-  if (!/^https:\/\//i.test(imageUrl)) return null;
+  if (!/^(https:\/\/|data:image\/)/i.test(imageUrl)) return null;
+  if (imageUrl.length > 4_194_304) return null;
   const f = FRAMES[kind];
   const pad = 24;
   const w = f.w + pad * 2;
