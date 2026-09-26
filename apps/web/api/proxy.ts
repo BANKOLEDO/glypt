@@ -25,11 +25,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     await run(req, res);
   } catch (e) {
     console.error("proxy error:", e);
-    const cause = (e as { cause?: unknown }).cause;
-    const deep = cause && (cause as { cause?: unknown }).cause;
-    res
-      .status(500)
-      .json({ error: String((e as Error).message ?? e), cause: String(cause), deep: String(deep ?? "") });
+    res.status(500).json({ error: "upstream request failed" });
   }
 }
 
