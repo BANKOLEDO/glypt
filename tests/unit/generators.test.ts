@@ -38,19 +38,24 @@ describe("socialSvg", () => {
 });
 
 describe("mockupSvg", () => {
-  it("builds a browser frame for https images", () => {
-    const out = mockupSvg("https://example.com/shot.png", "browser");
-    expect(out).toContain('href="https://example.com/shot.png"');
+  it("builds a browser frame for inline data images", () => {
+    const out = mockupSvg("data:image/jpeg;base64,/9j/4AAQ==yellow", "browser");
+    expect(out).toContain('href="data:image/jpeg;base64,/9j/4AAQ==yellow"');
     expect(out).toContain("#F23D97");
   });
 
-  it("rejects non-https urls", () => {
+  it("rejects non-https, non-data urls", () => {
     expect(mockupSvg("http://example.com/x.png", "browser")).toBeNull();
+    expect(mockupSvg("http://localhost/x.png", "browser")).toBeNull();
     expect(mockupSvg("javascript:alert(1)", "phone")).toBeNull();
   });
 
+  it("rejects absurdly large payloads", () => {
+    expect(mockupSvg(`data:image/png;base64,${"A".repeat(4_194_305)}`, "browser")).toBeNull();
+  });
+
   it("supports phone frames without traffic lights", () => {
-    const out = mockupSvg("https://example.com/m.png", "phone");
+    const out = mockupSvg("data:image/png;base64,abc", "phone");
     expect(out).not.toContain("#F23D97");
   });
 });
