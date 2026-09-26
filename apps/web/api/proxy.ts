@@ -7,6 +7,7 @@ const SKIP = new Set([
   "content-encoding",
   "content-length",
   "host",
+  "set-cookie",
 ]);
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -16,7 +17,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
-  const upstream = `${origin}${req.url ?? ""}`;
+  const url = new URL(req.url ?? "", "http://localhost");
+  const params = url.searchParams;
+  const originalPath = params.get("__p") ?? url.pathname;
+  params.delete("__p");
+  const query = params.toString();
+  const upstream = `${origin}${originalPath}${query ? `?${query}` : ""}`;
+
   const headers: Record<string, string> = {};
   for (const [key, value] of Object.entries(req.headers)) {
     if (typeof value === "string") headers[key] = value;
@@ -27,8 +34,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const init: RequestInit = { method: req.method ?? "GET", headers };
   if (req.method !== "GET" && req.method !== "HEAD") {
     const readBody = (req as unknown as { readBody?: () => Promise<Buffer> }).readBody;
-    const raw = readBody ? await readBody() : Buffer.from(JSON.stringify(req.body ?? ""));
-    if (raw.byteLength > 0) init.body = raw;
+    if (readBody) {
+      const raw = await readBody();
+      if (raw.byteLength > 0) init.body = raw;
+    } else if (req.body !== undefined && req.body !== "") {
+      init.body = Buffer.from(typeof req.body === "string" ? req.body : JSON.stringify(req.body));
+    }
   }
 
   const up = await fetch(upstream, init);
