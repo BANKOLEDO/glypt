@@ -10,6 +10,8 @@ const SKIP = new Set([
   "set-cookie",
 ]);
 
+const REQ_SKIP = new Set(["connection", "keep-alive", "transfer-encoding", "content-length", "host", "upgrade"]);
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     await run(req, res);
@@ -39,6 +41,7 @@ async function run(req: VercelRequest, res: VercelResponse) {
 
   const headers: Record<string, string> = {};
   for (const [key, value] of Object.entries(req.headers)) {
+    if (REQ_SKIP.has(key)) continue;
     if (typeof value === "string") headers[key] = value;
     else if (Array.isArray(value)) headers[key] = value.join(", ");
   }
