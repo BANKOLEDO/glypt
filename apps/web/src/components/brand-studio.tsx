@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Icon } from "@iconify/react";
-import { postJson } from "../lib/api";
+import { postJson, downloadExportZip } from "../lib/api";
 
 type BrandData = {
   domain: string;
@@ -17,6 +17,8 @@ export function BrandStudio({ initialDomain = "" }: { initialDomain?: string }) 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
+  const [exporting, setExporting] = useState(false);
+  const [exportMsg, setExportMsg] = useState<string | null>(null);
 
   const extract = useCallback(async (d: string) => {
     if (!d.trim()) return;
@@ -44,6 +46,21 @@ export function BrandStudio({ initialDomain = "" }: { initialDomain?: string }) 
       setTimeout(() => setCopied(null), 1500);
     } catch {
       // blocked
+    }
+  }
+
+  async function downloadMarks() {
+    if (!data || data.logoCandidates.length === 0) return;
+    setExporting(true);
+    setExportMsg(null);
+    try {
+      await downloadExportZip(data.logoCandidates, ["svg", "react"]);
+      setExportMsg("Saved glypt-export.zip");
+    } catch {
+      setExportMsg("Export failed");
+    } finally {
+      setExporting(false);
+      setTimeout(() => setExportMsg(null), 2400);
     }
   }
 
@@ -112,7 +129,18 @@ export function BrandStudio({ initialDomain = "" }: { initialDomain?: string }) 
           </div>
 
           <div className="card p-5 md:col-span-7">
-            <p className="label-mono">matching marks · icons aligned to this brand</p>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="label-mono">matching marks · icons aligned to this brand</p>
+              <button
+                onClick={() => void downloadMarks()}
+                disabled={!data || data.logoCandidates.length === 0 || exporting}
+                className="btn-ghost disabled:opacity-50"
+              >
+                <Icon icon={exporting ? "ph:dots-three-bold" : "ph:download-bold"} className="mr-1.5 inline size-4 align-[-2px]" aria-hidden />
+                {exporting ? "zipping…" : "Download icons"}
+              </button>
+            </div>
+            {exportMsg && <p role="status" className="mt-3 font-mono text-xs font-medium text-tang-hi">{exportMsg}</p>}
             {data.logoCandidates.length > 0 ? (
               <div className="mt-3 grid grid-cols-[repeat(auto-fill,minmax(84px,1fr))] gap-2">
                 {data.logoCandidates.map((id) => (
