@@ -84,6 +84,26 @@ describe("core routes", () => {
     expect(res.status).toBe(400);
   });
 
+  it("mockup requires an https image url", async () => {
+    const res = await fetch(`${base}/api/generate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ domain: "x.com", kind: "mockup", imageUrl: "http://example.com/x.png" }),
+    });
+    expect(res.status).toBe(400);
+  });
+
+  it("mockup degrades gracefully when the image cannot be loaded", async () => {
+    const res = await fetch(`${base}/api/generate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ domain: "x.com", kind: "mockup", imageUrl: "https://invalid.invalid/mockup.png" }),
+    });
+    expect(res.status).toBe(502);
+    const data = await res.json();
+    expect(typeof data.error).toBe("string");
+  });
+
   it("rejects cross-origin state changes when origin allowlist is configured", async () => {
     const prev = process.env.WEB_ORIGIN;
     process.env.WEB_ORIGIN = "http://localhost:5173";
