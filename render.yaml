@@ -4,8 +4,8 @@ services:
     runtime: node
     rootDir: apps/api
     plan: free
-    buildCommand: pnpm install --filter @glypt/api... && pnpm --filter @glypt/api build
-    startCommand: API_PORT=${PORT:-4000} node dist/index.js
+    buildCommand: pnpm install --frozen-lockfile
+    startCommand: API_PORT=${PORT:-4000} pnpm start
     healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
