@@ -13,6 +13,25 @@ const schema = z.object({
   frame: z.enum(["browser", "phone"]).optional(),
 });
 
+const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
+
+async function fetchAsInlineImage(url: string): Promise<string | null> {
+  try {
+    const res = await fetch(url, {
+      redirect: "follow",
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!res.ok) return null;
+    const ct = res.headers.get("content-type") ?? "";
+    if (!ct.startsWith("image/")) return null;
+    const buf = Buffer.from(await res.arrayBuffer());
+    if (buf.byteLength === 0 || buf.byteLength > MAX_IMAGE_BYTES) return null;
+    return `data:${ct};base64,${buf.toString("base64")}`;
+  } catch {
+    return null;
+  }
+}
+
 generateRouter.post("/", async (req, res) => {
   const parsed = schema.safeParse(req.body);
   if (!parsed.success) {
@@ -23,15 +42,17 @@ generateRouter.post("/", async (req, res) => {
 
   if (input.kind === "mockup") {
     if (!input.imageUrl || !/^https:\/\//i.test(input.imageUrl)) {
-      res.status(400).json({ error: "imageUrl must be an https url for mockups" });
+      res.status(400).json({ error: "imageUrl must be an https image url for mockups" });
       return;
     }
-    const svg = mockupSvg(input.imageUrl, input.frame ?? "browser");
+    // pull the image server-side so it renders anywhere, even in an <img>
+    const inline = await fetchAsInlineImage(input.imageUrl);
+    const svg = inline ? mockupSvg(inline, input.frame ?? "browser") : null;
     if (!svg) {
-      res.status(400).json({ error: "invalid image url" });
+      res.status(502).json({ error: "could not load that image (url may be invalid or expired)" });
       return;
     }
-    res.json({ kind: "mockup", svg });
+    res.json({ kind: "mockup", src: input.imageUrl, svg });
     return;
   }
 
