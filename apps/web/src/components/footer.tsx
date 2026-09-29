@@ -110,7 +110,20 @@ export function Footer() {
         </div>
 
         <div className="mt-12 flex flex-col gap-3 border-t border-line pt-6 font-mono text-[11px] tracking-[0.14em] text-mute uppercase sm:flex-row sm:items-center sm:justify-between">
-          <span>© {new Date().getFullYear()} Glypt Inc.</span>
+          <span className="flex flex-col gap-1">
+            <span>© {new Date().getFullYear()} Glypt Inc.</span>
+            <span>
+              built by{" "}
+              <a
+                href="https://devolabanks.xyz"
+                target="_blank"
+                rel="noreferrer"
+                className="text-ink underline decoration-line underline-offset-4 hover:decoration-ink"
+              >
+                Bankole David
+              </a>
+            </span>
+          </span>
           <span className="flex items-center gap-1.5">
             <span className="size-2 rounded-full bg-tang" />
             <span className="size-2 rounded-full bg-citrine" />
