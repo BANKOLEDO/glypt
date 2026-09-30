@@ -49,13 +49,49 @@ export function BrandStudio({ initialDomain = "" }: { initialDomain?: string }) 
     }
   }
 
+  async function rasterizePng(id: string, size = 256): Promise<string | null> {
+    const [prefix, name] = id.split(":");
+    if (!prefix || !name) return null;
+    const res = await fetch(`/api/icon?prefix=${encodeURIComponent(prefix)}&name=${encodeURIComponent(name)}`);
+    if (!res.ok) return null;
+    const svg = await res.text();
+    if (!svg.includes("<svg")) return null;
+    const img = new Image();
+    await new Promise<void>((resolve, reject) => {
+      img.onload = () => resolve();
+      img.onerror = () => reject(new Error("decode failed"));
+      img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+    });
+    const canvas = document.createElement("canvas");
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return null;
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, size, size);
+    ctx.drawImage(img, 0, 0, size, size);
+    return canvas.toDataURL("image/png");
+  }
+
   async function downloadMarks() {
     if (!data || data.logoCandidates.length === 0) return;
     setExporting(true);
     setExportMsg(null);
     try {
-      await downloadExportZip(data.logoCandidates, ["svg", "react"], `${data.domain.split(".")[0]}-glypt-export`);
-      setExportMsg("Saved glypt-export.zip");
+      const pngs: Record<string, string> = {};
+      const results = await Promise.all(
+        data.logoCandidates.map((id) => rasterizePng(id).catch(() => null)),
+      );
+      results.forEach((png, i) => {
+        if (png) pngs[data.logoCandidates[i]!] = png;
+      });
+      await downloadExportZip(
+        data.logoCandidates,
+        ["svg", "react"],
+        `${data.domain.split(".")[0]}-glypt-export`,
+        pngs,
+      );
+      setExportMsg(`Saved with ${Object.keys(pngs).length} PNGs`);
     } catch {
       setExportMsg("Export failed");
     } finally {

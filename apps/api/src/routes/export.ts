@@ -7,6 +7,7 @@ export const exportRouter = Router();
 const schema = z.object({
   icons: z.array(z.string().min(3).max(80)).min(1).max(32),
   formats: z.array(z.string()).optional(),
+  pngs: z.record(z.string().min(3).max(80), z.string().max(300_000)).optional(),
 });
 
 exportRouter.post("/", async (req, res) => {
@@ -29,6 +30,16 @@ exportRouter.post("/", async (req, res) => {
         name: `${id.replaceAll(":", "-")}.${fileExtFor(format)}`,
         data: encoder.encode(snippetFor(id, format)),
       });
+    }
+    if (parsed.data.pngs?.[id]) {
+      const src = parsed.data.pngs[id];
+      const m = src.match(/^data:image\/png;base64,(.+)$/);
+      if (m) {
+        entries.push({
+          name: `png/${id.replaceAll(":", "-")}.png`,
+          data: Buffer.from(m[1], "base64"),
+        });
+      }
     }
     if (!useFormats.includes("svg")) {
       const svg = await fetchIconSvg(id).catch(() => null);

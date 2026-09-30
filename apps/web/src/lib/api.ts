@@ -27,12 +27,13 @@ export async function downloadExportZip(
   ids: string[],
   formats: string[],
   name = "glypt-export",
+  pngs?: Record<string, string>,
 ): Promise<void> {
   const res = await fetch("/api/export", {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ icons: ids, formats }),
+    body: JSON.stringify({ icons: ids, formats, pngs }),
   });
   if (!res.ok) throw new Error("export failed");
   const blob = await res.blob();
