@@ -54,7 +54,7 @@ export function BrandStudio({ initialDomain = "" }: { initialDomain?: string }) 
     setExporting(true);
     setExportMsg(null);
     try {
-      await downloadExportZip(data.logoCandidates, ["svg", "react"]);
+      await downloadExportZip(data.logoCandidates, ["svg", "react"], `${data.domain.split(".")[0]}-glypt-export`);
       setExportMsg("Saved glypt-export.zip");
     } catch {
       setExportMsg("Export failed");

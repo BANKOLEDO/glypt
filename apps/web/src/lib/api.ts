@@ -23,7 +23,11 @@ export async function postJson<T>(path: string, body: unknown): Promise<T> {
   return data as T;
 }
 
-export async function downloadExportZip(ids: string[], formats: string[]): Promise<void> {
+export async function downloadExportZip(
+  ids: string[],
+  formats: string[],
+  name = "glypt-export",
+): Promise<void> {
   const res = await fetch("/api/export", {
     method: "POST",
     credentials: "include",
@@ -35,7 +39,7 @@ export async function downloadExportZip(ids: string[], formats: string[]): Promi
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "glypt-export.zip";
+  a.download = `${name}.zip`;
   a.click();
   URL.revokeObjectURL(url);
 }
