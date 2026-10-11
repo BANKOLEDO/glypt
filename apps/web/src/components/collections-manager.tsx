@@ -481,9 +481,9 @@ export function CollectionsManager({ user }: { user: User }) {
                         }}
                         aria-label={`Copy id ${id}`}
                         title="Copy icon id"
-                        className="grid size-6 place-items-center rounded-md bg-sky-soft text-sky transition-colors hover:bg-sky hover:text-white"
+                        className="grid h-6 min-w-5 place-items-center rounded-md bg-sky-soft px-1 font-mono text-[9px] font-bold tracking-wide text-sky uppercase transition-colors hover:bg-sky hover:text-white"
                       >
-                        <Icon icon="ph:identification-card-bold" className="size-3" aria-hidden />
+                        id
                       </button>
                       <button
                         onClick={() => setPendingRemove(id)}
