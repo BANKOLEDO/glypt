@@ -25,6 +25,13 @@ async function post(path: string, body: unknown) {
     body: JSON.stringify(body),
   });
   const data = await res.json().catch(() => ({}));
+  if (!res.ok && res.status >= 500) {
+    // keep raw server/database text away from people
+    return { ok: false, data: { error: "Something went wrong on our end. Please try again." } } as {
+      ok: boolean;
+      data: { user?: User; error?: string };
+    };
+  }
   return { ok: res.ok, data } as { ok: boolean; data: { user?: User; error?: string } };
 }
 
