@@ -244,31 +244,37 @@ export function CollectionsManager({ user }: { user: User }) {
 
       {/* stats */}
       <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-4" role="list" aria-label="Workspace summary">
-        <div className="rounded-2xl bg-tang-soft p-3.5 sm:p-4">
-          <span className="grid size-8 place-items-center rounded-xl bg-white text-tang sm:size-9">
+        <div className="flex items-center gap-3 rounded-2xl bg-tang-soft p-3.5 sm:p-4">
+          <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-white text-tang sm:size-10">
             <Icon icon="ph:folder-simple-bold" className="size-4" aria-hidden />
           </span>
-          <p className="mt-3 font-display text-2xl leading-none font-bold text-ink sm:text-3xl">{collections.length}</p>
-          <p className="mt-1.5 font-mono text-[9px] tracking-[0.14em] text-ink/60 uppercase sm:text-[10px]">folders</p>
+          <div className="min-w-0">
+            <p className="font-display text-2xl leading-none font-bold text-ink sm:text-3xl">{collections.length}</p>
+            <p className="mt-1 font-mono text-[9px] tracking-[0.14em] text-ink/60 uppercase sm:text-[10px]">folders</p>
+          </div>
         </div>
-        <div className="rounded-2xl bg-mint-soft p-3.5 sm:p-4">
-          <span className="grid size-8 place-items-center rounded-xl bg-white text-mint sm:size-9">
+        <div className="flex items-center gap-3 rounded-2xl bg-mint-soft p-3.5 sm:p-4">
+          <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-white text-mint sm:size-10">
             <Icon icon="ph:cube-bold" className="size-4" aria-hidden />
           </span>
-          <p className="mt-3 font-display text-2xl leading-none font-bold text-ink sm:text-3xl">{totalIcons}</p>
-          <p className="mt-1.5 font-mono text-[9px] tracking-[0.14em] text-ink/60 uppercase sm:text-[10px]">icons saved</p>
+          <div className="min-w-0">
+            <p className="font-display text-2xl leading-none font-bold text-ink sm:text-3xl">{totalIcons}</p>
+            <p className="mt-1 font-mono text-[9px] tracking-[0.14em] text-ink/60 uppercase sm:text-[10px]">icons saved</p>
+          </div>
         </div>
-        <div className="col-span-2 rounded-2xl bg-citrine-soft p-3.5 sm:col-span-1 sm:p-4">
+        <div className="col-span-2 flex items-center gap-3 rounded-2xl bg-citrine-soft p-3.5 sm:col-span-1 sm:p-4">
           <span
-            className="grid size-8 place-items-center rounded-xl bg-white font-brand text-[11px] font-bold sm:size-9"
+            className="grid size-9 shrink-0 place-items-center rounded-xl bg-white font-brand text-xs font-bold sm:size-10 sm:text-sm"
             style={{ color: active?.color ?? "#9A6A00" }}
           >
             {(active?.name ?? "—").slice(0, 1).toUpperCase()}
           </span>
-          <p className="mt-3 truncate font-display text-base leading-tight font-bold text-ink sm:text-lg">
-            {active?.name ?? "—"}
-          </p>
-          <p className="mt-1.5 font-mono text-[9px] tracking-[0.14em] text-ink/60 uppercase sm:text-[10px]">active folder</p>
+          <div className="min-w-0">
+            <p className="truncate font-display text-base leading-tight font-bold text-ink sm:text-lg">
+              {active?.name ?? "—"}
+            </p>
+            <p className="mt-1 font-mono text-[9px] tracking-[0.14em] text-ink/60 uppercase sm:text-[10px]">active folder</p>
+          </div>
         </div>
       </div>
 
