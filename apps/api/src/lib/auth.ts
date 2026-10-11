@@ -46,6 +46,13 @@ export const loginSchema = z.object({
   password: z.string().min(1).max(200),
 });
 
+export const passwordSchema = z
+  .string()
+  .min(10)
+  .max(200)
+  .regex(/[a-zA-Z]/, "needs a letter")
+  .regex(/[0-9]/, "needs a digit");
+
 const DUMMY_HASH = bcrypt.hashSync("timing-equalizer", 12);
 
 function normalizeEmail(email: string): string {
@@ -123,6 +130,65 @@ export async function resolveIdentity(req: Request): Promise<Identity | null> {
     return { userId: did, plan: "free", authenticated: false };
   }
   return null;
+}
+
+export async function updateUserName(userId: string, name: string): Promise<SessionUser | null> {
+  const { rows } = await getDb().query<SessionUser>(
+    "UPDATE users SET name = $1 WHERE id = $2 RETURNING id, email, plan, name",
+    [name, userId],
+  );
+  return rows[0] ?? null;
+}
+
+export async function changePassword(
+  userId: string,
+  current: string,
+  next: string,
+): Promise<boolean> {
+  const db = getDb();
+  const { rows } = await db.query<{ password_hash: string }>(
+    "SELECT password_hash FROM users WHERE id = $1",
+    [userId],
+  );
+  const user = rows[0];
+  const ok = await bcrypt.compare(current, user?.password_hash ?? DUMMY_HASH);
+  if (!user || !ok) return false;
+  const hash = await bcrypt.hash(next, 12);
+  await db.query("UPDATE users SET password_hash = $1 WHERE id = $2", [hash, userId]);
+  return true;
+}
+
+export async function createPasswordReset(email: string): Promise<string | null> {
+  const db = getDb();
+  const { rows } = await db.query<{ id: string }>("SELECT id FROM users WHERE email = $1", [
+    normalizeEmail(email),
+  ]);
+  const user = rows[0];
+  if (!user) return null; // caller must not reveal whether the account exists
+  const token = newSessionToken();
+  await db.query(
+    "INSERT INTO password_resets (token_hash, user_id, expires_at) VALUES ($1, $2, now() + interval '1 hour')",
+    [hashToken(token), user.id],
+  );
+  return token;
+}
+
+export async function consumePasswordReset(token: string, next: string): Promise<boolean> {
+  if (!isValidSessionToken(token)) return false;
+  const db = getDb();
+  const { rows } = await db.query<{ user_id: string }>(
+    `UPDATE password_resets SET used_at = now()
+     WHERE token_hash = $1 AND used_at IS NULL AND expires_at > now()
+     RETURNING user_id`,
+    [hashToken(token)],
+  );
+  const row = rows[0];
+  if (!row) return false;
+  const hash = await bcrypt.hash(next, 12);
+  await db.query("UPDATE users SET password_hash = $1 WHERE id = $2", [hash, row.user_id]);
+  // force re-authentication everywhere after a reset
+  await db.query("DELETE FROM sessions WHERE user_id = $1", [row.user_id]);
+  return true;
 }
 
 // naive fixed-window limiter, per ip+bucket, good enough for a single node
