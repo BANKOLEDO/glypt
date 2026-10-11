@@ -225,11 +225,11 @@ export function CollectionsManager({ user }: { user: User }) {
                   {active.icons.length} {active.icons.length === 1 ? "icon" : "icons"}
                 </span>
               </div>
-              <div className="flex w-full gap-2 sm:w-auto">
+              <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
                 <button
                   onClick={createShare}
                   disabled={!active.icons.length}
-                  className="btn-ghost flex-1 !px-4 !py-2.5 disabled:opacity-50 sm:flex-none"
+                  className="btn-ghost w-full !px-4 !py-2.5 disabled:opacity-50 sm:w-auto"
                 >
                   <Icon icon="ph:link-bold" className="size-4" aria-hidden />
                   Share link
@@ -237,7 +237,7 @@ export function CollectionsManager({ user }: { user: User }) {
                 <button
                   onClick={exportZip}
                   disabled={!active.icons.length || exporting}
-                  className="btn-primary flex-1 !px-4 !py-2.5 disabled:opacity-50 sm:flex-none"
+                  className="btn-primary w-full !px-4 !py-2.5 disabled:opacity-50 sm:w-auto"
                 >
                   <Icon
                     icon={exporting ? "ph:circle-notch-bold" : "ph:download-bold"}
@@ -248,7 +248,7 @@ export function CollectionsManager({ user }: { user: User }) {
                 </button>
                 <button
                   onClick={() => setPendingDelete(active)}
-                  className="btn-ghost flex-1 !border-berry/30 !px-4 !py-2.5 text-berry hover:!border-berry hover:!bg-berry/5 sm:flex-none"
+                  className="btn-ghost col-span-2 w-full !border-berry/30 !px-4 !py-2.5 text-berry hover:!border-berry hover:!bg-berry/5 sm:col-span-1 sm:w-auto"
                 >
                   <Icon icon="ph:trash-bold" className="size-4" aria-hidden />
                   Delete
