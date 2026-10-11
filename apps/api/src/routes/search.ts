@@ -1,12 +1,11 @@
 import { Router } from "express";
 import { searchIcons, fetchIconSvg, isValidIconId } from "@glypt/core";
-import { attachIdentity, meterQuota, issueDeviceCookie } from "../lib/middleware";
+import { attachIdentity, meterQuota } from "../lib/middleware";
 
 export const searchRouter = Router();
 export const iconRouter = Router();
 
 searchRouter.get("/", attachIdentity, meterQuota, async (req, res) => {
-  issueDeviceCookie(res, req as never);
   const q = String(req.query.q ?? "").slice(0, 100);
   const limitRaw = Number(req.query.limit ?? 24);
   const limit = Math.min(Math.max(Number.isFinite(limitRaw) ? limitRaw : 24, 1), 32);
