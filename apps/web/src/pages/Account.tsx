@@ -107,7 +107,7 @@ export default function Account() {
         <div
           role="tablist"
           aria-label="Account sections"
-          className="mt-6 grid grid-cols-2 gap-1.5 rounded-full border-2 border-ink bg-white p-1.5 shadow-[3px_3px_0_0_var(--color-line)] sm:grid-cols-4"
+          className="mt-6 grid grid-cols-4 gap-1 overflow-hidden rounded-full border-2 border-ink bg-white p-1 shadow-[3px_3px_0_0_var(--color-line)]"
         >
           {TABS.map((t) => (
             <button
@@ -116,8 +116,8 @@ export default function Account() {
               aria-selected={tab === t.id}
               onClick={() => setTab(t.id)}
               className={clsx(
-                "inline-flex items-center justify-center gap-2 rounded-full px-3 py-2 font-mono text-[11px] font-bold tracking-wide uppercase transition-all",
-                tab === t.id ? "bg-ink text-citrine shadow-[2px_2px_0_0_rgba(34,27,21,0.35)]" : "text-mute hover:text-ink",
+                "inline-flex min-w-0 items-center justify-center gap-1.5 rounded-full px-1 py-2 font-mono text-[10px] font-bold tracking-wide uppercase transition-colors sm:gap-2 sm:px-3 sm:text-[11px]",
+                tab === t.id ? "bg-ink text-citrine" : "text-mute hover:text-ink",
               )}
             >
               <Icon icon={t.icon} className="size-4" aria-hidden />
