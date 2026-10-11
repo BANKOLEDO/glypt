@@ -6,6 +6,7 @@ import Nav from "../components/nav";
 import { useAuth } from "../lib/auth";
 import { getJson, postJson, deleteJson } from "../lib/api";
 import { usePageTitle } from "../lib/usePageTitle";
+import ConfirmDialog from "../components/confirm-dialog";
 
 type ApiKey = {
   id: string;
@@ -286,6 +287,8 @@ function KeysPanel({ flash }: { flash: (m: string) => void }) {
   const [secret, setSecret] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pendingRevoke, setPendingRevoke] = useState<ApiKey | null>(null);
+  const [revoking, setRevoking] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -327,6 +330,17 @@ function KeysPanel({ flash }: { flash: (m: string) => void }) {
       flash("API key revoked");
     } catch (err) {
       setError(err instanceof Error ? err.message : "could not revoke key");
+    }
+  }
+
+  async function confirmRevoke() {
+    if (!pendingRevoke) return;
+    setRevoking(true);
+    try {
+      await revoke(pendingRevoke.id);
+    } finally {
+      setRevoking(false);
+      setPendingRevoke(null);
     }
   }
 
@@ -402,7 +416,7 @@ function KeysPanel({ flash }: { flash: (m: string) => void }) {
                   </p>
                 </div>
                 <button
-                  onClick={() => void revoke(key.id)}
+                  onClick={() => setPendingRevoke(key)}
                   className="shrink-0 rounded-full border-2 border-line px-3 py-1 font-mono text-[10px] font-bold tracking-wide text-mute uppercase transition-colors hover:border-berry hover:text-berry"
                 >
                   revoke
@@ -415,6 +429,23 @@ function KeysPanel({ flash }: { flash: (m: string) => void }) {
       <p className="font-mono text-[10px] text-mute">
         Use keys as <code>Authorization: Bearer &lt;key&gt;</code> against the Glypt API.
       </p>
+
+      <ConfirmDialog
+        open={pendingRevoke !== null}
+        tone="danger"
+        title="Revoke this API key?"
+        message={
+          <>
+            Any tool using <span className="font-mono text-ink">{pendingRevoke?.name}</span> will stop working
+            immediately. This cannot be undone.
+          </>
+        }
+        confirmLabel="Revoke key"
+        cancelLabel="Keep it"
+        busy={revoking}
+        onConfirm={confirmRevoke}
+        onCancel={() => setPendingRevoke(null)}
+      />
     </div>
   );
 }
