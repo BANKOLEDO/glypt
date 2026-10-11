@@ -75,6 +75,26 @@ describe("core routes", () => {
     expect(buf[1]).toBe(0x4b);
   });
 
+  it("export embeds client-rasterized pngs", async () => {
+    const res = await fetch(`${base}/api/export`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        icons: ["lucide:rocket"],
+        formats: ["svg"],
+        pngs: {
+          "lucide:rocket":
+            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==",
+        },
+      }),
+    });
+    expect(res.status).toBe(200);
+    expect(res.headers.get("content-type")).toContain("application/zip");
+    const bytes = new Uint8Array(await res.arrayBuffer());
+    const text = new TextDecoder().decode(bytes);
+    expect(text).toContain("png/lucide-rocket.png");
+  });
+
   it("export rejects invalid ids", async () => {
     const res = await fetch(`${base}/api/export`, {
       method: "POST",
