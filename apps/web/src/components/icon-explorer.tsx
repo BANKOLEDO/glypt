@@ -152,6 +152,17 @@ export function IconExplorer({
     setTimeout(() => setToast(null), 1800);
   }
 
+  async function copyId(id: string, e: React.MouseEvent) {
+    e.stopPropagation();
+    try {
+      await navigator.clipboard.writeText(id);
+      setToast(`${id} id copied`);
+    } catch {
+      setToast("Clipboard blocked by browser");
+    }
+    setTimeout(() => setToast(null), 1800);
+  }
+
   return (
     <div className="relative">
       <div className="flex items-center gap-2 rounded-md border-2 border-line bg-white px-3 py-1 transition-colors focus-within:border-tang">
@@ -324,6 +335,15 @@ export function IconExplorer({
                               icon={favorites.includes(id) ? "ph:push-pin-fill" : "ph:push-pin"}
                               className="size-3.5"
                             />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => void copyId(id, e)}
+                            aria-label={`Copy id ${id}`}
+                            title="Copy icon id"
+                            className="absolute bottom-1 left-1 grid size-6 place-items-center rounded-full border border-line bg-white/90 text-mute opacity-0 transition-all group-hover:opacity-100 hover:border-ink hover:text-tang focus-visible:opacity-100 active:scale-90 max-md:opacity-100"
+                          >
+                            <Icon icon="ph:hash-bold" className="size-3.5" />
                           </button>
                         </>
                       )}
