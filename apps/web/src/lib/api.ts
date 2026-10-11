@@ -23,6 +23,45 @@ export async function postJson<T>(path: string, body: unknown): Promise<T> {
   return data as T;
 }
 
+export async function rasterizeIconPng(id: string, size = 256): Promise<string | null> {
+  const [prefix, name] = id.split(":");
+  if (!prefix || !name) return null;
+  try {
+    const res = await fetch(
+      `/api/icon?prefix=${encodeURIComponent(prefix)}&name=${encodeURIComponent(name)}`,
+    );
+    if (!res.ok) return null;
+    const svg = await res.text();
+    if (!svg.includes("<svg")) return null;
+    const img = new Image();
+    await new Promise<void>((resolve, reject) => {
+      img.onload = () => resolve();
+      img.onerror = () => reject(new Error("decode failed"));
+      img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+    });
+    const canvas = document.createElement("canvas");
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return null;
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, size, size);
+    ctx.drawImage(img, 0, 0, size, size);
+    return canvas.toDataURL("image/png");
+  } catch {
+    return null;
+  }
+}
+
+export async function collectPngs(ids: string[]): Promise<Record<string, string>> {
+  const out: Record<string, string> = {};
+  const results = await Promise.all(ids.map((id) => rasterizeIconPng(id).catch(() => null)));
+  results.forEach((png, i) => {
+    if (png) out[ids[i]!] = png;
+  });
+  return out;
+}
+
 export async function downloadExportZip(
   ids: string[],
   formats: string[],
