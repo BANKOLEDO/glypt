@@ -154,6 +154,10 @@ export function IconExplorer({
 
   async function copyId(id: string, e: React.MouseEvent) {
     e.stopPropagation();
+    await copyIdText(id);
+  }
+
+  async function copyIdText(id: string) {
     try {
       await navigator.clipboard.writeText(id);
       setToast(`${id} id copied`);
@@ -241,6 +245,7 @@ export function IconExplorer({
           ids={favorites}
           onPick={pick}
           onUnpin={(id) => void toggle(id)}
+          onCopyId={(id) => void copyIdText(id)}
           compact={compact}
         />
       ) : (
@@ -381,10 +386,12 @@ function StashBoard({
   ids,
   onPick,
   onUnpin,
+  onCopyId,
 }: {
   ids: string[];
   onPick: (id: string) => void;
   onUnpin: (id: string) => void;
+  onCopyId: (id: string) => void;
   compact: boolean;
 }) {
   if (ids.length === 0) {
@@ -438,9 +445,18 @@ function StashBoard({
                 type="button"
                 onClick={() => onUnpin(id)}
                 aria-label={`Unpin ${id}`}
-                className="absolute -top-2 -right-2 grid size-6 place-items-center rounded-full border-2 border-ink bg-white text-ink opacity-0 transition-opacity hover:bg-berry hover:text-white group-hover:opacity-100 focus-visible:opacity-100"
+                className="absolute -top-2 -right-2 grid size-6 place-items-center rounded-full border-2 border-ink bg-white text-ink opacity-0 transition-opacity hover:bg-berry hover:text-white group-hover:opacity-100 focus-visible:opacity-100 max-md:opacity-100"
               >
                 <Icon icon="ph:x-bold" className="size-3" />
+              </button>
+              <button
+                type="button"
+                onClick={() => onCopyId(id)}
+                aria-label={`Copy id ${id}`}
+                title="Copy icon id"
+                className="absolute -top-2 -left-2 grid size-6 place-items-center rounded-full border-2 border-ink bg-white text-ink opacity-0 transition-opacity hover:bg-tang hover:text-white group-hover:opacity-100 focus-visible:opacity-100 max-md:opacity-100"
+              >
+                <Icon icon="ph:hash-bold" className="size-3" />
               </button>
             </div>
           );
