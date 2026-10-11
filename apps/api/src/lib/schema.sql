@@ -91,3 +91,20 @@ CREATE TABLE IF NOT EXISTS password_resets (
   used_at TIMESTAMPTZ
 );
 CREATE INDEX IF NOT EXISTS idx_password_resets_user ON password_resets (user_id);
+
+CREATE TABLE IF NOT EXISTS billing_checkouts (
+  checkout_id TEXT PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  plan_pending TEXT NOT NULL,
+  fulfilled_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_billing_checkouts_user ON billing_checkouts (user_id);
+
+CREATE TABLE IF NOT EXISTS payment_events (
+  event_id TEXT PRIMARY KEY,
+  type TEXT NOT NULL,
+  user_id UUID,
+  plan TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
