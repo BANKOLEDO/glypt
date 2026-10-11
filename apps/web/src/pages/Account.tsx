@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import clsx from "clsx";
 import Nav from "../components/nav";
 import { useAuth } from "../lib/auth";
 import { getJson, postJson, deleteJson } from "../lib/api";
+import { startCheckout, type PaidPlan } from "../lib/billing";
 import { usePageTitle } from "../lib/usePageTitle";
 import ConfirmDialog from "../components/confirm-dialog";
 
@@ -37,10 +38,17 @@ export default function Account() {
   const [tab, setTab] = useState<TabId>("profile");
   const [toast, setToast] = useState<string | null>(null);
   const navigate = useNavigate();
+  const [params, setParams] = useSearchParams();
+  const billing = params.get("billing");
 
   useEffect(() => {
     if (!loading && !user) navigate("/signin?next=/account", { replace: true });
   }, [loading, user, navigate]);
+
+  function dismissBilling() {
+    params.delete("billing");
+    setParams(params, { replace: true });
+  }
 
   function flash(message: string) {
     setToast(message);
@@ -75,6 +83,27 @@ export default function Account() {
             </div>
           </div>
         )}
+
+        {billing && (
+          <div className="mt-4 flex items-start gap-2">
+            <div className="flex-1">
+              {billing === "success" ? (
+                <Note tone="good">Payment received — your plan updates in a moment. Refresh if it still shows the old one.</Note>
+              ) : (
+                <Note tone="info">Checkout cancelled. No charge was made.</Note>
+              )}
+            </div>
+            <button
+              onClick={dismissBilling}
+              aria-label="Dismiss"
+              className="grid size-7 shrink-0 place-items-center rounded-md text-mute hover:text-ink"
+            >
+              <Icon icon="ph:x-bold" className="size-3.5" aria-hidden />
+            </button>
+          </div>
+        )}
+
+        {user && <div className="mt-6"><PlanPanel plan={user.plan} /></div>}
 
         <div
           role="tablist"
@@ -152,6 +181,63 @@ function PanelHead({ icon, title, accent = "bg-tang" }: { icon: string; title: s
         <Icon icon={icon} className="size-4" aria-hidden />
       </span>
       <h2 className="font-mono text-[11px] font-bold tracking-[0.14em] text-ink uppercase">{title}</h2>
+    </div>
+  );
+}
+
+function PlanPanel({ plan }: { plan: string }) {
+  const [busy, setBusy] = useState<PaidPlan | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  async function upgrade(id: PaidPlan) {
+    setError(null);
+    setBusy(id);
+    try {
+      window.location.href = await startCheckout(id);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "could not start checkout");
+      setBusy(null);
+    }
+  }
+
+  return (
+    <div className={clsx(PANEL, "bg-white")}>
+      <PanelHead icon="ph:sparkle-bold" title="plan" accent="bg-citrine" />
+      <div className="flex flex-wrap items-center gap-3">
+        <span className="sticker bg-citrine text-ink">{plan} plan</span>
+        <p className="text-sm text-mute">
+          {plan === "free"
+            ? "Free covers the essentials. Upgrade for unlimited searches, the API and team tools."
+            : "Thanks for supporting Glypt. You can change or add a plan anytime."}
+        </p>
+        <div className="ml-auto flex flex-wrap gap-2">
+          {plan !== "pro" && (
+            <button
+              type="button"
+              disabled={busy === "pro"}
+              onClick={() => void upgrade("pro")}
+              className="btn-ghost !py-2 text-sm disabled:opacity-60"
+            >
+              {busy === "pro" ? "Starting…" : "Upgrade to Pro · $19"}
+            </button>
+          )}
+          {plan !== "team" && (
+            <button
+              type="button"
+              disabled={busy === "team"}
+              onClick={() => void upgrade("team")}
+              className="btn-primary !py-2 text-sm disabled:opacity-60"
+            >
+              {busy === "team" ? "Starting…" : "Go Team · $49"}
+            </button>
+          )}
+        </div>
+      </div>
+      {error && (
+        <div className="mt-3">
+          <Note tone="bad">{error}</Note>
+        </div>
+      )}
     </div>
   );
 }
