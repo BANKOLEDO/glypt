@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Icon } from "@iconify/react";
+import clsx from "clsx";
 import { snippetFor } from "@glypt/core";
 import { getJson, postJson, downloadExportZip, collectPngs } from "../lib/api";
 import type { User } from "../lib/auth";
@@ -273,71 +274,94 @@ export function CollectionsManager({ user }: { user: User }) {
 
       <div className="grid gap-5 lg:grid-cols-[300px_1fr]">
         {/* folders */}
-        <div className="card flex flex-col overflow-hidden p-4">
-          <div className="flex items-center justify-between">
-            <p className="label-mono">brand folders</p>
-            <span className="rounded-full bg-paper px-2 py-0.5 font-mono text-[10px] font-bold text-mute">
-              {collections.length}
-            </span>
-          </div>
-
-          <ul className="mt-3 space-y-1.5">
-            {collections.map((c) => (
-              <li key={c.id}>
-                <button
-                  onClick={() => setActiveId(c.id)}
-                  aria-current={activeId === c.id}
-                  className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left transition-all ${
-                    activeId === c.id
-                      ? "bg-tang-soft font-bold text-tang-hi ring-1 ring-tang/20"
-                      : "text-mute hover:bg-paper hover:text-ink active:translate-y-px"
-                  }`}
-                >
-                  <span
-                    className={`size-2 shrink-0 rounded-full transition-transform ${activeId === c.id ? "scale-125" : ""}`}
-                    style={{ backgroundColor: c.color }}
-                  />
-                  <span className="min-w-0 flex-1">
-                    <span className="flex items-center gap-2">
-                      <span className="min-w-0 truncate font-medium">{c.name}</span>
+        <div className="flex flex-col">
+          <span className="ml-4 inline-flex w-fit items-center gap-2 rounded-t-xl border-2 border-b-0 border-ink bg-ink px-3.5 py-1.5 font-mono text-[11px] font-bold tracking-wide text-citrine uppercase">
+            <Icon icon="ph:folder-simple-star-bold" className="size-4" aria-hidden />
+            brand folders
+            <span className="rounded-full bg-citrine px-1.5 text-[10px] text-ink">{collections.length}</span>
+          </span>
+          <div className="-mt-0.5 flex flex-1 flex-col rounded-2xl rounded-tl-none border-2 border-ink bg-white p-3 shadow-[6px_6px_0_0_var(--color-ink)]">
+            <ul className="space-y-2">
+              {collections.map((c) => {
+                const isActive = activeId === c.id;
+                return (
+                  <li key={c.id}>
+                    <button
+                      onClick={() => setActiveId(c.id)}
+                      aria-current={isActive}
+                      className={clsx(
+                        "group relative flex w-full items-center gap-3 overflow-hidden rounded-xl border-2 py-2.5 pr-2.5 pl-3.5 text-left transition-all",
+                        isActive
+                          ? "border-ink bg-white shadow-[3px_3px_0_0_var(--color-ink)]"
+                          : "border-transparent hover:border-line hover:bg-paper active:translate-y-px",
+                      )}
+                    >
+                      <span aria-hidden className="absolute inset-y-0 left-0 w-1.5" style={{ backgroundColor: c.color }} />
                       <span
-                        className="shrink-0 rounded-full bg-paper px-1.5 font-mono text-[10px] font-bold ring-1 ring-line"
-                        style={{ color: c.color }}
+                        className="grid size-8 shrink-0 place-items-center rounded-lg text-white shadow-[2px_2px_0_0_rgba(34,27,21,0.35)]"
+                        style={{ backgroundColor: c.color }}
+                      >
+                        <Icon icon={isActive ? "ph:folder-open-fill" : "ph:folder-simple-fill"} className="size-4" aria-hidden />
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate font-display text-[15px] font-bold text-ink">{c.name}</span>
+                        <span className="font-mono text-[10px] text-mute">
+                          {c.icons.length} {c.icons.length === 1 ? "asset" : "assets"}
+                        </span>
+                      </span>
+                      <span
+                        className="grid min-w-6 shrink-0 place-items-center rounded-full px-1.5 py-0.5 font-mono text-[10px] font-bold"
+                        style={{ color: c.color, backgroundColor: `${c.color}1a` }}
                       >
                         {c.icons.length}
                       </span>
-                    </span>
-                  </span>
-                  <Icon
-                    icon="ph:caret-right-bold"
-                    className={`size-4 shrink-0 transition-transform ${activeId === c.id ? "rotate-90 text-tang" : "text-mute/40"}`}
-                    aria-hidden
-                  />
-                </button>
-              </li>
-            ))}
-            {collections.length === 0 && (
-              <li className="rounded-xl border-2 border-dashed border-line px-4 py-6 text-center">
-                <Icon icon="ph:folder-plus-bold" className="mx-auto size-6 text-mute/40" aria-hidden />
-                <p className="mt-2 text-sm text-mute">No folders yet. Create one below.</p>
-              </li>
-            )}
-          </ul>
+                      {isActive ? (
+                        <span className="sticker shrink-0 bg-citrine text-ink">open</span>
+                      ) : (
+                        <Icon
+                          icon="ph:caret-right-bold"
+                          className="size-4 shrink-0 text-mute/40 transition-transform group-hover:translate-x-0.5"
+                          aria-hidden
+                        />
+                      )}
+                    </button>
+                  </li>
+                );
+              })}
+              {collections.length === 0 && (
+                <li className="rounded-xl border-2 border-dashed border-line px-4 py-6 text-center">
+                  <Icon icon="ph:folder-plus-bold" className="mx-auto size-6 text-mute/40" aria-hidden />
+                  <p className="mt-2 text-sm text-mute">No folders yet. Create one below.</p>
+                </li>
+              )}
+            </ul>
 
-          <form onSubmit={createFolder} className="mt-4 space-y-1.5 rounded-xl bg-paper p-2 ring-1 ring-line">
-            <input
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              placeholder="new folder…"
-              aria-label="New folder name"
-              className="w-full rounded-lg border-2 border-line bg-white px-3 py-2 font-mono text-xs text-ink placeholder:text-mute/60 focus:border-tang focus:outline-none"
-            />
-            <button type="submit" className="btn-primary w-full !rounded-lg !px-3 !py-2 text-xs">
-              <Icon icon="ph:plus-bold" className="size-4" aria-hidden />
-              Create folder
-            </button>
-          </form>
-          <p className="mt-2 px-1 font-mono text-[10px] text-mute/70">signed in as {user.email}</p>
+            <form
+              onSubmit={createFolder}
+              className="mt-3 flex items-center gap-2 rounded-xl border-2 border-dashed border-line bg-paper p-1.5 transition-colors focus-within:border-tang"
+            >
+              <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-white text-tang ring-1 ring-line">
+                <Icon icon="ph:folder-plus-bold" className="size-4" aria-hidden />
+              </span>
+              <input
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                placeholder="new folder…"
+                aria-label="New folder name"
+                className="min-w-0 flex-1 bg-transparent font-mono text-xs text-ink placeholder:text-mute/60 focus:outline-none"
+              />
+              <button
+                type="submit"
+                disabled={!newName.trim()}
+                aria-label="Create folder"
+                title="Create folder"
+                className="grid size-8 shrink-0 place-items-center rounded-lg bg-tang text-white shadow-[2px_2px_0_0_var(--color-ink)] transition-transform active:translate-x-px active:translate-y-px active:shadow-none disabled:opacity-40 disabled:shadow-none"
+              >
+                <Icon icon="ph:plus-bold" className="size-4" aria-hidden />
+              </button>
+            </form>
+            <p className="mt-2 px-1 font-mono text-[10px] text-mute/70">signed in as {user.email}</p>
+          </div>
         </div>
 
         {/* assets */}
