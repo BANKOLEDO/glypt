@@ -1,32 +1,38 @@
 import { Router } from "express";
 import { z } from "zod";
-import { createHash, randomUUID } from "node:crypto";
+import { randomUUID } from "node:crypto";
 import { searchIcons, extractBrand, safePalette, socialSvg, deckHtml } from "@glypt/core";
-import { getDb } from "../lib/db";
+import { getDb, hasDatabase } from "../lib/db";
+import { resolveApiKey } from "../lib/keys";
 
 export const v1Router = Router();
 
-function keyHash(key: string): string {
-  return createHash("sha256").update(key).digest("hex").slice(0, 32);
-}
-
-function checkKey(req: { headers: Record<string, unknown> }): string | null {
-  const token = process.env.ADMIN_TOKEN;
-  if (!token) return null;
+async function authenticate(req: { headers: Record<string, unknown> }): Promise<{ userId: string } | null> {
   const provided = String(req.headers["x-api-key"] ?? "");
-  return provided && provided === token ? keyHash(provided) : null;
+  if (!provided) return null;
+  const admin = process.env.ADMIN_TOKEN;
+  if (admin && provided === admin) return { userId: "admin" };
+  const key = await resolveApiKey(provided);
+  return key ? { userId: key.userId } : null;
 }
 
-async function meter(keyId: string, res: { setHeader: (k: string, v: string) => void }) {
-  const db = getDb();
-  const { rows } = await db.query<{ count: number }>(
-    `INSERT INTO usage_events (user_id, day, count) VALUES ($1, CURRENT_DATE, 1)
-     ON CONFLICT (user_id, day) DO UPDATE SET count = usage_events.count + 1
-     RETURNING count`,
-    [keyId],
-  );
-  const remaining = Math.max(0, 5000 - (rows[0]?.count ?? 0));
-  res.setHeader("x-quota-remaining", String(remaining));
+async function meter(
+  userId: string,
+  res: { setHeader: (k: string, v: string) => void },
+): Promise<void> {
+  res.setHeader("x-quota-remaining", "unlimited");
+  if (!hasDatabase()) return;
+  try {
+    const { rows } = await getDb().query<{ count: number }>(
+      `INSERT INTO usage_events (user_id, day, count) VALUES ($1, CURRENT_DATE, 1)
+       ON CONFLICT (user_id, day) DO UPDATE SET count = usage_events.count + 1
+       RETURNING count`,
+      [userId],
+    );
+    res.setHeader("x-quota-remaining", String(Math.max(0, 5000 - (rows[0]?.count ?? 0))));
+  } catch {
+    // metering is best-effort; never fail the request over it
+  }
 }
 
 const generateSchema = z.object({
@@ -37,13 +43,13 @@ const generateSchema = z.object({
 });
 
 v1Router.get("/icons/search", async (req, res) => {
-  const keyId = checkKey(req);
-  if (!keyId) {
+  const auth = await authenticate(req);
+  if (!auth) {
     res.status(401).json({ error: "missing or invalid x-api-key" });
     return;
   }
   try {
-    await meter(keyId, res);
+    await meter(auth.userId, res);
     const q = String((req.query.q as string | undefined) ?? "arrow");
     const limit = Math.min(Math.max(Number(req.query.limit ?? 24) || 24, 1), 64);
     const result = await searchIcons(q, limit);
@@ -54,8 +60,8 @@ v1Router.get("/icons/search", async (req, res) => {
 });
 
 v1Router.post("/generate", async (req, res) => {
-  const keyId = checkKey(req);
-  if (!keyId) {
+  const auth = await authenticate(req);
+  if (!auth) {
     res.status(401).json({ error: "missing or invalid x-api-key" });
     return;
   }
@@ -65,7 +71,7 @@ v1Router.post("/generate", async (req, res) => {
     return;
   }
   try {
-    await meter(keyId, res);
+    await meter(auth.userId, res);
     const kit = await extractBrand(parsed.data.domain);
     if (!kit) {
       res.status(400).json({ error: "invalid domain" });
@@ -87,3 +93,4 @@ v1Router.post("/generate", async (req, res) => {
     res.status(502).json({ error: "generation failed" });
   }
 });
+
