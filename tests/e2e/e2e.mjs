@@ -176,6 +176,25 @@ async function run() {
       "marketplace lists collections",
       m.status === 200 && Array.isArray(m.data.collections) && m.data.collections.length > 0,
     );
+
+    const fav = await fetch(`${BASE}/api/favorites`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ iconId: "ph:star" }),
+    });
+    const favCookie = (fav.headers.getSetCookie?.() ?? []).find((c) =>
+      c.startsWith("glypt_did="),
+    );
+    ok("favorite pins and issues a device cookie", fav.status === 201 && Boolean(favCookie));
+    if (favCookie) {
+      const list = await json(BASE, "/api/favorites", {
+        headers: { cookie: favCookie.split(";")[0] },
+      });
+      ok(
+        "favorite listed back for that device",
+        list.status === 200 && Array.isArray(list.data.icons) && list.data.icons.includes("ph:star"),
+      );
+    }
   }
 
   // ---- auth flow (requires DATABASE_URL) ----
