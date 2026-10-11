@@ -298,9 +298,14 @@ export function CollectionsManager({ user }: { user: User }) {
                     style={{ backgroundColor: c.color }}
                   />
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate font-medium">{c.name}</span>
-                    <span className="font-mono text-[10px] font-normal text-mute">
-                      {c.icons.length} {c.icons.length === 1 ? "asset" : "assets"}
+                    <span className="flex items-center gap-2">
+                      <span className="min-w-0 truncate font-medium">{c.name}</span>
+                      <span
+                        className="shrink-0 rounded-full bg-paper px-1.5 font-mono text-[10px] font-bold ring-1 ring-line"
+                        style={{ color: c.color }}
+                      >
+                        {c.icons.length}
+                      </span>
                     </span>
                   </span>
                   <Icon
