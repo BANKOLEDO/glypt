@@ -20,6 +20,7 @@ type ApiKey = {
 
 const TABS = [
   { id: "profile", label: "Profile", icon: "ph:user-circle-bold" },
+  { id: "plan", label: "Plan", icon: "ph:sparkle-bold" },
   { id: "password", label: "Password", icon: "ph:lock-key-bold" },
   { id: "keys", label: "API keys", icon: "ph:key-bold" },
 ] as const;
@@ -34,12 +35,12 @@ function fmtDate(value: string | null): string {
 
 export default function Account() {
   usePageTitle("Account · Glypt");
-  const { user, loading, updateProfile, changePassword } = useAuth();
-  const [tab, setTab] = useState<TabId>("profile");
-  const [toast, setToast] = useState<string | null>(null);
-  const navigate = useNavigate();
+  const { user, loading, updateProfile, changePassword, refresh } = useAuth();
   const [params, setParams] = useSearchParams();
   const billing = params.get("billing");
+  const [tab, setTab] = useState<TabId>(billing ? "plan" : "profile");
+  const [toast, setToast] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!loading && !user) navigate("/signin?next=/account", { replace: true });
@@ -103,12 +104,10 @@ export default function Account() {
           </div>
         )}
 
-        {user && <div className="mt-6"><PlanPanel plan={user.plan} /></div>}
-
         <div
           role="tablist"
           aria-label="Account sections"
-          className="mt-6 grid grid-cols-3 gap-1.5 rounded-full border-2 border-ink bg-white p-1.5 shadow-[3px_3px_0_0_var(--color-line)]"
+          className="mt-6 grid grid-cols-2 gap-1.5 rounded-full border-2 border-ink bg-white p-1.5 shadow-[3px_3px_0_0_var(--color-line)] sm:grid-cols-4"
         >
           {TABS.map((t) => (
             <button
@@ -129,6 +128,7 @@ export default function Account() {
 
         <div className="mt-5">
           {user && tab === "profile" && <ProfilePanel user={user} onSave={updateProfile} flash={flash} />}
+          {user && tab === "plan" && <PlanPanel plan={user.plan} flash={flash} onRefresh={refresh} />}
           {user && tab === "password" && <PasswordPanel onChange={changePassword} flash={flash} />}
           {user && tab === "keys" && <KeysPanel flash={flash} />}
         </div>
@@ -185,9 +185,19 @@ function PanelHead({ icon, title, accent = "bg-tang" }: { icon: string; title: s
   );
 }
 
-function PlanPanel({ plan }: { plan: string }) {
+function PlanPanel({
+  plan,
+  flash,
+  onRefresh,
+}: {
+  plan: string;
+  flash: (m: string) => void;
+  onRefresh: () => Promise<void>;
+}) {
   const [busy, setBusy] = useState<PaidPlan | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [confirmFree, setConfirmFree] = useState(false);
+  const [switching, setSwitching] = useState(false);
 
   async function upgrade(id: PaidPlan) {
     setError(null);
@@ -200,6 +210,21 @@ function PlanPanel({ plan }: { plan: string }) {
     }
   }
 
+  async function goFree() {
+    setSwitching(true);
+    setError(null);
+    try {
+      await postJson("/api/billing/cancel", {});
+      await onRefresh();
+      setConfirmFree(false);
+      flash("You are back on the Free plan");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "could not change plan");
+    } finally {
+      setSwitching(false);
+    }
+  }
+
   return (
     <div className={clsx(PANEL, "bg-white")}>
       <PanelHead icon="ph:sparkle-bold" title="plan" accent="bg-citrine" />
@@ -208,9 +233,9 @@ function PlanPanel({ plan }: { plan: string }) {
         <p className="text-sm text-mute">
           {plan === "free"
             ? "Free covers the essentials. Upgrade for unlimited searches, the API and team tools."
-            : "Thanks for supporting Glypt. You can change or add a plan anytime."}
+            : "Thanks for supporting Glypt. You can change your plan anytime."}
         </p>
-        <div className="ml-auto flex flex-wrap gap-2">
+        <div className="ml-auto flex flex-wrap items-center gap-2">
           {plan !== "pro" && (
             <button
               type="button"
@@ -231,6 +256,15 @@ function PlanPanel({ plan }: { plan: string }) {
               {busy === "team" ? "Starting…" : "Go Team · $49"}
             </button>
           )}
+          {plan !== "free" && (
+            <button
+              type="button"
+              onClick={() => setConfirmFree(true)}
+              className="!py-2 text-sm font-bold text-mute underline decoration-line underline-offset-4 hover:text-ink"
+            >
+              Switch to Free
+            </button>
+          )}
         </div>
       </div>
       {error && (
@@ -238,6 +272,18 @@ function PlanPanel({ plan }: { plan: string }) {
           <Note tone="bad">{error}</Note>
         </div>
       )}
+
+      <ConfirmDialog
+        open={confirmFree}
+        tone="danger"
+        title="Switch to the Free plan?"
+        message="You'll lose the paid features right away. You can upgrade again anytime."
+        confirmLabel="Switch to Free"
+        cancelLabel="Stay put"
+        busy={switching}
+        onConfirm={goFree}
+        onCancel={() => setConfirmFree(false)}
+      />
     </div>
   );
 }
