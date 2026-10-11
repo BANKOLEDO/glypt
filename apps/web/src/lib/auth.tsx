@@ -9,6 +9,10 @@ type AuthState = {
   login: (email: string, password: string) => Promise<string | null>;
   register: (email: string, password: string, name?: string) => Promise<string | null>;
   logout: () => Promise<void>;
+  updateProfile: (name: string) => Promise<string | null>;
+  changePassword: (current: string, next: string) => Promise<string | null>;
+  requestReset: (email: string) => Promise<string | null>;
+  resetPassword: (token: string, password: string) => Promise<string | null>;
 };
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -65,8 +69,51 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   }, []);
 
+  const updateProfile = useCallback(async (name: string) => {
+    const res = await fetch("/api/auth/me", {
+      method: "PATCH",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (res.ok && data.user) {
+      setUser(data.user);
+      return null;
+    }
+    return (data as { error?: string }).error ?? "could not save";
+  }, []);
+
+  const changePassword = useCallback(async (current: string, next: string) => {
+    const { ok, data } = await post("/api/auth/password", { currentPassword: current, newPassword: next });
+    return ok ? null : (data.error ?? "could not change password");
+  }, []);
+
+  const requestReset = useCallback(async (email: string) => {
+    const { ok, data } = await post("/api/auth/reset-request", { email });
+    return ok ? null : (data.error ?? "could not send reset");
+  }, []);
+
+  const resetPassword = useCallback(async (token: string, password: string) => {
+    const { ok, data } = await post("/api/auth/reset", { token, password });
+    return ok ? null : (data.error ?? "could not reset password");
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, loading, refresh, login, register, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        refresh,
+        login,
+        register,
+        logout,
+        updateProfile,
+        changePassword,
+        requestReset,
+        resetPassword,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
