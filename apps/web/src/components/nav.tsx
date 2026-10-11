@@ -156,6 +156,28 @@ export function Nav() {
               })}
             </ul>
 
+            {user && (
+              <div className="mt-2 border-t border-line pt-3">
+                <Link
+                  to="/account"
+                  aria-current={pathname.startsWith("/account") ? "page" : undefined}
+                  className={clsx(
+                    "flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition-colors",
+                    pathname.startsWith("/account")
+                      ? "bg-tang-soft text-tang-hi"
+                      : "text-ink hover:bg-paper",
+                  )}
+                >
+                  <Icon icon="ph:user-circle-bold" className="size-5 opacity-70" />
+                  <span className="min-w-0 flex-1 truncate">{user.name || user.email}</span>
+                  <Icon
+                    icon="ph:caret-right-bold"
+                    className={clsx("size-4", pathname.startsWith("/account") ? "text-tang" : "text-mute/50")}
+                  />
+                </Link>
+              </div>
+            )}
+
             {!user && (
               <div className="mt-2 grid grid-cols-2 gap-2 border-t border-line pt-3">
                 <Link to="/signin" className="btn-ghost w-full justify-center !py-2.5 text-sm">
