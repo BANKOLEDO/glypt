@@ -23,6 +23,18 @@ export async function postJson<T>(path: string, body: unknown): Promise<T> {
   return data as T;
 }
 
+export async function deleteJson<T>(path: string, body?: unknown): Promise<T> {
+  const res = await fetch(path, {
+    method: "DELETE",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error((data as { error?: string }).error ?? `request failed (${res.status})`);
+  return data as T;
+}
+
 export async function rasterizeIconPng(id: string, size = 256): Promise<string | null> {
   const [prefix, name] = id.split(":");
   if (!prefix || !name) return null;
