@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Icon } from "@iconify/react";
 import clsx from "clsx";
 import { FORMATS, LANGS, fileExtFor, snippetFor, type Format, type Lang } from "@glypt/core";
+import { useFavorites } from "../lib/favorites";
 
 const COLLECTION_COLOR: Record<string, string> = {
   lucide: "#FF5A1F",
@@ -14,8 +15,14 @@ const COLLECTION_COLOR: Record<string, string> = {
   simple_icons: "#8A7E72",
 };
 
+const PIN_COLORS = ["#FF5A1F", "#FFC531", "#00C389", "#35A4FF", "#F23D97"];
+
 function accentFor(id: string): string {
   return COLLECTION_COLOR[id.split(":")[0]] ?? "#FFB020";
+}
+
+function tiltFor(id: string): number {
+  return ((id.charCodeAt(id.length - 1) % 5) - 2) * 1.7;
 }
 
 export function IconExplorer({
@@ -35,7 +42,9 @@ export function IconExplorer({
   const [toast, setToast] = useState<string | null>(null);
   const [recent, setRecent] = useState<string[]>([]);
   const [nonce, setNonce] = useState(0);
+  const [pinnedOnly, setPinnedOnly] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
+  const { favorites, toggle } = useFavorites();
 
   useEffect(() => {
     try {
@@ -135,6 +144,14 @@ export function IconExplorer({
     setTimeout(() => setToast(null), 2200);
   }
 
+  async function pin(id: string, e: React.MouseEvent) {
+    e.stopPropagation();
+    const wasIn = favorites.includes(id);
+    await toggle(id);
+    setToast(wasIn ? `${id} unpinned` : `${id} pinned to your stash`);
+    setTimeout(() => setToast(null), 1800);
+  }
+
   return (
     <div className="relative">
       <div className="flex items-center gap-2 rounded-md border-2 border-line bg-white px-3 py-1 transition-colors focus-within:border-tang">
@@ -183,93 +200,146 @@ export function IconExplorer({
               ))}
             </span>
           )}
-          {total > 0 && (
-            <span className="ml-auto font-mono text-[11px] tracking-wide text-mute">
-              {total.toLocaleString()} matches
-            </span>
-          )}
-        </div>
-      )}
 
-      {recent.length > 0 && !query && (
-        <div className="mt-3 flex flex-wrap gap-2">
-          {recent.map((r) => (
-            <button key={r} onClick={() => setQuery(r)} className="chip hover:!text-ink">
-              ↺ {r}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {error && (
-        <div className="mt-3 flex items-center gap-3">
-          <p role="alert" className="font-mono text-xs font-medium text-berry">
-            {error}
-          </p>
           <button
-            onClick={() => setNonce((n) => n + 1)}
-            className="rounded-full border-2 border-ink bg-white px-3 py-1 font-mono text-[10px] font-bold tracking-wide uppercase shadow-[2px_2px_0_0_var(--color-line)] transition-transform active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
+            onClick={() => setPinnedOnly((p) => !p)}
+            aria-pressed={pinnedOnly}
+            className={clsx(
+              "ml-auto inline-flex items-center gap-1.5 rounded-full border-2 py-1 pr-2.5 pl-2 font-mono text-[11px] font-bold tracking-wide uppercase transition-all",
+              pinnedOnly
+                ? "border-ink bg-citrine text-ink shadow-[2px_2px_0_0_var(--color-ink)]"
+                : "border-line bg-white text-mute hover:border-ink hover:text-ink",
+            )}
           >
-            retry
+            <Icon icon="ph:push-pin-fill" className="size-3.5" aria-hidden />
+            stash
+            <span
+              className={clsx(
+                "grid min-w-5 place-items-center rounded-full px-1 text-[10px]",
+                pinnedOnly ? "bg-ink text-citrine" : "bg-paper text-mute",
+              )}
+            >
+              {favorites.length}
+            </span>
           </button>
         </div>
       )}
 
-      {icons.length > 0 && (
-        <div
-          className={clsx(
-            "mt-2.5 scrollbar-none",
-            compact && "max-h-44 overflow-y-auto pr-1",
+      {pinnedOnly ? (
+        <StashBoard
+          ids={favorites}
+          onPick={pick}
+          onUnpin={(id) => void toggle(id)}
+          compact={compact}
+        />
+      ) : (
+        <>
+          {recent.length > 0 && !query && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {recent.map((r) => (
+                <button key={r} onClick={() => setQuery(r)} className="chip hover:!text-ink">
+                  ↺ {r}
+                </button>
+              ))}
+            </div>
           )}
-        >
-          <div
-            className={clsx(
-              "grid gap-1.5 sm:gap-2",
-              compact
-                ? "grid-cols-6 sm:grid-cols-8"
-                : "grid-cols-[repeat(auto-fill,minmax(64px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(84px,1fr))]",
-            )}
-            role="listbox"
-            aria-label="Icon results"
-          >
-            {icons.map((id) => (
-              <button
-                key={id}
-                role="option"
-                aria-selected={false}
-                onClick={() => pick(id)}
-                title={`${id} · click to copy`}
-                className={clsx(
-                  "group relative grid aspect-square place-items-center overflow-hidden rounded-lg bg-paper ring-1 ring-line transition-all",
-                  "hover:-translate-y-0.5 hover:bg-white hover:shadow-[0_8px_16px_-10px_rgba(34,27,21,0.35)] hover:ring-tang",
-                  compact ? "" : "rounded-xl",
-                )}
-              >
-                <Icon
-                  icon={id}
-                  width={compact ? 18 : 28}
-                  height={compact ? 18 : 28}
-                  className="text-ink transition-transform group-hover:scale-110"
-                />
-                {!compact && (
-                  <>
-                    <span
-                      className="absolute top-1.5 left-1.5 size-2 rounded-full"
-                      style={{ backgroundColor: accentFor(id) }}
-                    />
-                    <span className="absolute inset-x-1 bottom-1 truncate font-mono text-[9px] tracking-wide text-mute opacity-0 transition-opacity group-hover:opacity-100">
-                      {id.split(":")[1]}
-                    </span>
-                  </>
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
 
-      {query && !loading && icons.length === 0 && !error && (
-        <p className="mt-4 font-mono text-xs text-mute">no matches for “{query}”</p>
+          {error && (
+            <div className="mt-3 flex items-center gap-3">
+              <p role="alert" className="font-mono text-xs font-medium text-berry">
+                {error}
+              </p>
+              <button
+                onClick={() => setNonce((n) => n + 1)}
+                className="rounded-full border-2 border-ink bg-white px-3 py-1 font-mono text-[10px] font-bold tracking-wide uppercase shadow-[2px_2px_0_0_var(--color-line)] transition-transform active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
+              >
+                retry
+              </button>
+            </div>
+          )}
+
+          {icons.length > 0 && (
+            <div
+              className={clsx(
+                "mt-2.5 scrollbar-none",
+                compact && "max-h-44 overflow-y-auto pr-1",
+              )}
+            >
+              <div
+                className={clsx(
+                  "grid gap-1.5 sm:gap-2",
+                  compact
+                    ? "grid-cols-6 sm:grid-cols-8"
+                    : "grid-cols-[repeat(auto-fill,minmax(64px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(84px,1fr))]",
+                )}
+                role="listbox"
+                aria-label="Icon results"
+              >
+                {icons.map((id) => (
+                  <div
+                    key={id}
+                    role="option"
+                    aria-selected={false}
+                    tabIndex={0}
+                    onClick={() => pick(id)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        pick(id);
+                      }
+                    }}
+                    title={`${id} · click to copy`}
+                    className={clsx(
+                      "group relative grid aspect-square cursor-pointer place-items-center overflow-hidden rounded-lg bg-paper ring-1 ring-line outline-none transition-all",
+                      "hover:-translate-y-0.5 hover:bg-white hover:shadow-[0_8px_16px_-10px_rgba(34,27,21,0.35)] hover:ring-tang",
+                      "focus-visible:ring-2 focus-visible:ring-tang",
+                      compact ? "" : "rounded-xl",
+                    )}
+                  >
+                    <Icon
+                      icon={id}
+                      width={compact ? 18 : 28}
+                      height={compact ? 18 : 28}
+                      className="text-ink transition-transform group-hover:scale-110"
+                    />
+                    {!compact && (
+                      <>
+                        <span
+                          className="absolute top-1.5 left-1.5 size-2 rounded-full"
+                          style={{ backgroundColor: accentFor(id) }}
+                        />
+                        <button
+                          type="button"
+                          onClick={(e) => void pin(id, e)}
+                          aria-label={favorites.includes(id) ? `Unpin ${id}` : `Pin ${id} to stash`}
+                          aria-pressed={favorites.includes(id)}
+                          className={clsx(
+                            "absolute top-1 right-1 grid size-6 place-items-center rounded-full border transition-all active:scale-90",
+                            favorites.includes(id)
+                              ? "border-ink bg-citrine text-ink opacity-100 shadow-[1.5px_1.5px_0_0_var(--color-ink)]"
+                              : "border-line bg-white/90 text-mute opacity-0 group-hover:opacity-100 hover:border-ink hover:text-tang focus-visible:opacity-100",
+                          )}
+                        >
+                          <Icon
+                            icon={favorites.includes(id) ? "ph:push-pin-fill" : "ph:push-pin"}
+                            className="size-3.5"
+                          />
+                        </button>
+                        <span className="absolute inset-x-1 bottom-1 truncate font-mono text-[9px] tracking-wide text-mute opacity-0 transition-opacity group-hover:opacity-100">
+                          {id.split(":")[1]}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {query && !loading && icons.length === 0 && !error && (
+            <p className="mt-4 font-mono text-xs text-mute">no matches for “{query}”</p>
+          )}
+        </>
       )}
 
       {toast && (
@@ -280,6 +350,81 @@ export function IconExplorer({
           {toast}
         </div>
       )}
+    </div>
+  );
+}
+
+function StashBoard({
+  ids,
+  onPick,
+  onUnpin,
+}: {
+  ids: string[];
+  onPick: (id: string) => void;
+  onUnpin: (id: string) => void;
+  compact: boolean;
+}) {
+  if (ids.length === 0) {
+    return (
+      <div className="dot-bg mt-3 rounded-xl border-2 border-dashed border-line p-8 text-center">
+        <span className="mx-auto grid size-12 place-items-center rounded-2xl bg-citrine text-ink shadow-[3px_3px_0_0_var(--color-ink)]">
+          <Icon icon="ph:push-pin-fill" className="size-6" />
+        </span>
+        <p className="mt-3 font-display text-base font-bold">Your stash is empty.</p>
+        <p className="mt-1 font-mono text-[11px] text-mute">
+          Hover any icon and tap the pin to save it here.
+        </p>
+      </div>
+    );
+  }
+  return (
+    <div className="dot-bg mt-3 rounded-xl border-2 border-line bg-paper p-4 sm:p-5">
+      <div className="flex items-center justify-between">
+        <p className="label-mono">pinned to your stash</p>
+        <span className="sticker bg-citrine text-ink">{ids.length} saved</span>
+      </div>
+      <div className="mt-4 grid grid-cols-[repeat(auto-fill,minmax(84px,1fr))] gap-3 sm:grid-cols-[repeat(auto-fill,minmax(96px,1fr))]">
+        {ids.map((id, i) => {
+          const tilt = tiltFor(id);
+          const color = PIN_COLORS[i % PIN_COLORS.length];
+          return (
+            <div
+              key={id}
+              className="group relative"
+              style={{ transform: `rotate(${tilt}deg)` }}
+            >
+              <span
+                aria-hidden
+                className="absolute -top-2 left-1/2 z-10 -translate-x-1/2 text-lg drop-shadow-[0_2px_0_rgba(34,27,21,0.25)]"
+                style={{ color }}
+              >
+                <Icon icon="ph:push-pin-fill" />
+              </span>
+              <button
+                type="button"
+                onClick={() => onPick(id)}
+                title={`${id} · click to copy`}
+                className="grid aspect-square w-full place-items-center rounded-xl border-2 border-ink bg-white shadow-[3px_3px_0_0_var(--color-ink)] transition-transform hover:-translate-y-1"
+              >
+                <Icon icon={id} width={34} height={34} className="text-ink" />
+                <span
+                  className="absolute inset-x-2 bottom-1.5 truncate text-center font-mono text-[9px] tracking-wide text-mute"
+                >
+                  {id.split(":")[1]}
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => onUnpin(id)}
+                aria-label={`Unpin ${id}`}
+                className="absolute -top-2 -right-2 grid size-6 place-items-center rounded-full border-2 border-ink bg-white text-ink opacity-0 transition-opacity hover:bg-berry hover:text-white group-hover:opacity-100 focus-visible:opacity-100"
+              >
+                <Icon icon="ph:x-bold" className="size-3" />
+              </button>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
