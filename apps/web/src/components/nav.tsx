@@ -83,9 +83,14 @@ export function Nav() {
         <div className="ml-auto flex shrink-0 items-center gap-2">
           {user ? (
             <>
-              <span className="hidden max-w-36 truncate font-mono text-[11px] text-mute sm:inline">
-                {user.name || user.email}
-              </span>
+              <Link
+                to="/account"
+                aria-label="Account settings"
+                className="hidden max-w-36 items-center gap-1.5 font-mono text-[11px] text-mute transition-colors hover:text-ink sm:inline-flex"
+              >
+                <Icon icon="ph:user-circle-bold" className="size-4 shrink-0" aria-hidden />
+                <span className="truncate">{user.name || user.email}</span>
+              </Link>
               <button onClick={() => void logout()} className="btn !px-4 !py-2 border-2 border-line bg-white text-xs text-mute hover:border-ink hover:text-ink">
                 Sign out
               </button>
