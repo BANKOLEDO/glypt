@@ -167,25 +167,27 @@ export function CollectionsManager({ user }: { user: User }) {
     <div className="space-y-5">
       {/* active folder hero */}
       {active ? (
-        <div className="card relative overflow-hidden p-0">
-          <div className="absolute inset-x-0 top-0 z-10 grid h-1.5 grid-cols-5" aria-hidden>
-            <div className="bg-tang" />
-            <div className="bg-citrine" />
-            <div className="bg-mint" />
-            <div className="bg-sky" />
-            <div className="bg-berry" />
-          </div>
-          <div className="relative p-5 pt-7 sm:p-6 sm:pt-8">
+        <div className="relative">
+          <div
+            aria-hidden
+            className="relative z-10 ml-6 h-7 w-36 rounded-t-2xl border-2 border-b-0 border-ink"
+            style={{ backgroundColor: active.color }}
+          />
+          <div className="-mt-0.5 rounded-2xl rounded-tl-none border-2 border-ink bg-white p-5 shadow-[6px_6px_0_0_var(--color-ink)] sm:p-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="min-w-0">
-                <p className="label-mono">active folder</p>
-                <div className="mt-2 flex items-center gap-2.5">
-                  <span className="size-3.5 shrink-0 rounded-full" style={{ backgroundColor: active.color }} />
-                  <h2 className="truncate font-display text-2xl font-bold text-ink sm:text-3xl">{active.name}</h2>
-                </div>
-                <p className="mt-1.5 font-mono text-[11px] tracking-[0.14em] text-mute uppercase">
-                  {active.icons.length} {active.icons.length === 1 ? "asset" : "assets"} ready to ship
-                </p>
+              <div className="flex min-w-0 items-center gap-3">
+                <span
+                  className="grid size-11 shrink-0 place-items-center rounded-xl bg-white ring-2 ring-ink"
+                  style={{ color: active.color }}
+                >
+                  <Icon icon="ph:folder-open-fill" className="size-6" aria-hidden />
+                </span>
+                <h2 className="min-w-0 truncate font-display text-3xl font-bold text-ink sm:text-4xl">
+                  {active.name}
+                </h2>
+                <span className="sticker shrink-0 bg-citrine text-ink">
+                  {active.icons.length} {active.icons.length === 1 ? "icon" : "icons"}
+                </span>
               </div>
               <div className="flex w-full gap-2 sm:w-auto">
                 <button
