@@ -5,6 +5,7 @@ import clsx from "clsx";
 import { snippetFor } from "@glypt/core";
 import { getJson, postJson, downloadExportZip, collectPngs } from "../lib/api";
 import type { User } from "../lib/auth";
+import ConfirmDialog from "./confirm-dialog";
 
 type Collection = {
   id: string;
@@ -25,6 +26,9 @@ export function CollectionsManager({ user }: { user: User }) {
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<Collection | null>(null);
+  const [pendingRemove, setPendingRemove] = useState<string | null>(null);
+  const [dialogBusy, setDialogBusy] = useState(false);
 
   const active = collections.find((c) => c.id === activeId) ?? null;
   const totalIcons = collections.reduce((sum, c) => sum + (c.count || c.icons.length), 0);
@@ -89,6 +93,37 @@ export function CollectionsManager({ user }: { user: User }) {
           : c,
       ),
     );
+  }
+
+  async function confirmRemove() {
+    const iconId = pendingRemove;
+    if (!iconId) return;
+    setDialogBusy(true);
+    try {
+      await removeIcon(iconId);
+      flash("Asset removed");
+    } finally {
+      setDialogBusy(false);
+      setPendingRemove(null);
+    }
+  }
+
+  async function deleteFolder() {
+    const target = pendingDelete;
+    if (!target) return;
+    setDialogBusy(true);
+    try {
+      await fetch(`/api/collections/${target.id}`, { method: "DELETE", credentials: "include" });
+      const next = collections.filter((c) => c.id !== target.id);
+      setCollections(next);
+      if (activeId === target.id) setActiveId(next[0]?.id ?? null);
+      flash("Folder deleted");
+    } catch {
+      flash("Could not delete folder");
+    } finally {
+      setDialogBusy(false);
+      setPendingDelete(null);
+    }
   }
 
   async function copyShareUrl() {
@@ -211,6 +246,13 @@ export function CollectionsManager({ user }: { user: User }) {
                   />
                   {exporting ? "Packing…" : "Export ZIP"}
                 </button>
+                <button
+                  onClick={() => setPendingDelete(active)}
+                  className="btn-ghost flex-1 !border-berry/30 !px-4 !py-2.5 text-berry hover:!border-berry hover:!bg-berry/5 sm:flex-none"
+                >
+                  <Icon icon="ph:trash-bold" className="size-4" aria-hidden />
+                  Delete
+                </button>
               </div>
             </div>
 
@@ -292,45 +334,49 @@ export function CollectionsManager({ user }: { user: User }) {
                 const isActive = activeId === c.id;
                 return (
                   <li key={c.id}>
-                    <button
-                      onClick={() => setActiveId(c.id)}
-                      aria-current={isActive}
+                    <div
                       className={clsx(
-                        "group relative flex w-full items-center gap-3 overflow-hidden rounded-xl border-2 py-2.5 pr-2.5 pl-3.5 text-left transition-all",
+                        "group relative flex w-full items-center gap-2 overflow-hidden rounded-xl border-2 py-2.5 pr-2 pl-3.5 transition-all",
                         isActive
                           ? "border-ink bg-white shadow-[3px_3px_0_0_var(--color-ink)]"
-                          : "border-transparent hover:border-line hover:bg-paper active:translate-y-px",
+                          : "border-transparent hover:border-line hover:bg-paper",
                       )}
                     >
                       <span aria-hidden className="absolute inset-y-0 left-0 w-1.5" style={{ backgroundColor: c.color }} />
-                      <span
-                        className="grid size-8 shrink-0 place-items-center rounded-lg text-white shadow-[2px_2px_0_0_rgba(34,27,21,0.35)]"
-                        style={{ backgroundColor: c.color }}
+                      <button
+                        onClick={() => setActiveId(c.id)}
+                        aria-current={isActive}
+                        className="flex min-w-0 flex-1 items-center gap-3 text-left focus:outline-none"
                       >
-                        <Icon icon={isActive ? "ph:folder-open-fill" : "ph:folder-simple-fill"} className="size-4" aria-hidden />
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="block truncate font-display text-[15px] font-bold text-ink">{c.name}</span>
-                        <span className="font-mono text-[10px] text-mute">
-                          {c.icons.length} {c.icons.length === 1 ? "asset" : "assets"}
+                        <span
+                          className="grid size-8 shrink-0 place-items-center rounded-lg text-white shadow-[2px_2px_0_0_rgba(34,27,21,0.35)]"
+                          style={{ backgroundColor: c.color }}
+                        >
+                          <Icon icon={isActive ? "ph:folder-open-fill" : "ph:folder-simple-fill"} className="size-4" aria-hidden />
                         </span>
-                      </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate font-display text-[15px] font-bold text-ink">{c.name}</span>
+                          <span className="font-mono text-[10px] text-mute">
+                            {c.icons.length} {c.icons.length === 1 ? "asset" : "assets"}
+                          </span>
+                        </span>
+                      </button>
                       <span
                         className="grid min-w-6 shrink-0 place-items-center rounded-full px-1.5 py-0.5 font-mono text-[10px] font-bold"
                         style={{ color: c.color, backgroundColor: `${c.color}1a` }}
                       >
                         {c.icons.length}
                       </span>
-                      {isActive ? (
-                        <span className="sticker shrink-0 bg-citrine text-ink">open</span>
-                      ) : (
-                        <Icon
-                          icon="ph:caret-right-bold"
-                          className="size-4 shrink-0 text-mute/40 transition-transform group-hover:translate-x-0.5"
-                          aria-hidden
-                        />
-                      )}
-                    </button>
+                      {isActive && <span className="sticker shrink-0 bg-citrine text-ink">open</span>}
+                      <button
+                        onClick={() => setPendingDelete(c)}
+                        aria-label={`Delete folder ${c.name}`}
+                        title="Delete folder"
+                        className="grid size-7 shrink-0 place-items-center rounded-lg text-mute/50 transition-colors hover:bg-berry/10 hover:text-berry focus-visible:bg-berry/10 focus-visible:text-berry sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
+                      >
+                        <Icon icon="ph:trash-bold" className="size-3.5" aria-hidden />
+                      </button>
+                    </div>
                   </li>
                 );
               })}
@@ -430,7 +476,7 @@ export function CollectionsManager({ user }: { user: User }) {
                         <Icon icon="ph:copy-bold" className="size-3" aria-hidden />
                       </button>
                       <button
-                        onClick={() => removeIcon(id)}
+                        onClick={() => setPendingRemove(id)}
                         aria-label={`Remove ${id}`}
                         title="Remove from folder"
                         className="grid size-6 place-items-center rounded-md bg-berry/10 text-berry transition-colors hover:bg-berry hover:text-white"
@@ -459,6 +505,41 @@ export function CollectionsManager({ user }: { user: User }) {
           )}
         </div>
       </div>
+
+      <ConfirmDialog
+        open={pendingDelete !== null}
+        tone="danger"
+        title={pendingDelete ? `Delete “${pendingDelete.name}”?` : "Delete folder?"}
+        message={
+          <>
+            {pendingDelete && pendingDelete.icons.length > 0
+              ? `${pendingDelete.icons.length} saved ${pendingDelete.icons.length === 1 ? "asset" : "assets"} and any share links will be removed. `
+              : ""}
+            This cannot be undone.
+          </>
+        }
+        confirmLabel="Delete folder"
+        cancelLabel="Keep it"
+        busy={dialogBusy}
+        onConfirm={deleteFolder}
+        onCancel={() => setPendingDelete(null)}
+      />
+
+      <ConfirmDialog
+        open={pendingRemove !== null}
+        tone="danger"
+        title="Remove this asset?"
+        message={
+          <>
+            {pendingRemove} will be taken out of {active?.name ?? "this folder"}. You can add it back anytime.
+          </>
+        }
+        confirmLabel="Remove"
+        cancelLabel="Keep it"
+        busy={dialogBusy}
+        onConfirm={confirmRemove}
+        onCancel={() => setPendingRemove(null)}
+      />
 
       {msg && (
         <div
