@@ -9,6 +9,7 @@ import { brandRouter } from "./routes/brand";
 import { generateRouter } from "./routes/generate";
 import { exportRouter } from "./routes/export";
 import { favoritesRouter } from "./routes/favorites";
+import { apiKeysRouter } from "./routes/api-keys";
 import { collectionsRouter } from "./routes/collections";
 import { sharesRouter } from "./routes/shares";
 import { marketplaceRouter } from "./routes/marketplace";
@@ -68,6 +69,7 @@ export function createApp(): express.Express {
   app.use("/api/generate", generateRouter);
   app.use("/api/export", exportRouter);
   app.use("/api/favorites", favoritesRouter);
+  app.use("/api/keys", apiKeysRouter);
   app.use("/api/collections", collectionsRouter);
   app.use("/api/marketplace", marketplaceRouter);
   app.use("/api/shares", sharesRouter);
