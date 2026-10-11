@@ -243,7 +243,7 @@ export function CollectionsManager({ user }: { user: User }) {
       )}
 
       {/* stats */}
-      <div className="grid grid-cols-3 gap-2.5 sm:gap-4" role="list" aria-label="Workspace summary">
+      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-4" role="list" aria-label="Workspace summary">
         <div className="rounded-2xl bg-tang-soft p-3.5 sm:p-4">
           <span className="grid size-8 place-items-center rounded-xl bg-white text-tang sm:size-9">
             <Icon icon="ph:folder-simple-bold" className="size-4" aria-hidden />
@@ -258,7 +258,7 @@ export function CollectionsManager({ user }: { user: User }) {
           <p className="mt-3 font-display text-2xl leading-none font-bold text-ink sm:text-3xl">{totalIcons}</p>
           <p className="mt-1.5 font-mono text-[9px] tracking-[0.14em] text-ink/60 uppercase sm:text-[10px]">icons saved</p>
         </div>
-        <div className="rounded-2xl bg-citrine-soft p-3.5 sm:p-4">
+        <div className="col-span-2 rounded-2xl bg-citrine-soft p-3.5 sm:col-span-1 sm:p-4">
           <span
             className="grid size-8 place-items-center rounded-xl bg-white font-brand text-[11px] font-bold sm:size-9"
             style={{ color: active?.color ?? "#9A6A00" }}
@@ -366,19 +366,37 @@ export function CollectionsManager({ user }: { user: User }) {
 
         {/* assets */}
         <div className="min-w-0 space-y-4">
-          <form onSubmit={addIcon} className="card flex flex-col gap-2 p-4 sm:flex-row sm:flex-wrap sm:items-center">
-            <span className="label-mono shrink-0">add assets</span>
-            <input
-              value={addId}
-              onChange={(e) => setAddId(e.target.value)}
-              placeholder={active ? `save into "${active.name}"…` : "pick a folder first…"}
-              aria-label="Icon id"
+          <form
+            onSubmit={addIcon}
+            className="flex flex-wrap items-center gap-2 rounded-2xl border-2 border-ink bg-white p-2.5 shadow-[4px_4px_0_0_var(--color-ink)]"
+          >
+            <span
+              className="grid size-9 shrink-0 place-items-center rounded-xl text-white shadow-[2px_2px_0_0_rgba(34,27,21,0.35)]"
+              style={{ backgroundColor: active?.color ?? "#8a7e72" }}
+            >
+              <Icon icon="ph:plus-bold" className="size-4" aria-hidden />
+            </span>
+            <label className="min-w-0 flex-1">
+              <span className="sr-only">Icon id</span>
+              <input
+                value={addId}
+                onChange={(e) => setAddId(e.target.value)}
+                placeholder={active ? `paste an id to drop into ${active.name}…` : "pick a folder first…"}
+                disabled={!active}
+                className="w-full rounded-xl border-2 border-line bg-paper px-3.5 py-2.5 font-mono text-sm text-ink placeholder:text-mute/60 transition-colors focus:border-tang focus:bg-white focus:outline-none disabled:opacity-50"
+              />
+            </label>
+            <button
+              type="submit"
               disabled={!active}
-              className="input flex-1 disabled:opacity-50"
-            />
-            <button type="submit" disabled={!active} className="btn-primary w-full disabled:opacity-50 sm:w-auto">
+              className="btn-primary shrink-0 !px-5 !py-2.5 disabled:opacity-40"
+            >
+              <Icon icon="ph:check-bold" className="size-4" aria-hidden />
               Save
             </button>
+            <span className="w-full pl-11 font-mono text-[10px] text-mute/70">
+              e.g. lucide:rocket · mdi:heart
+            </span>
           </form>
 
           {active && active.icons.length > 0 ? (
