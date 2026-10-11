@@ -452,14 +452,14 @@ export default function Docs() {
           {/* cli */}
           <section id="cli" className="scroll-mt-28">
             <h2 className="h-display text-2xl">CLI</h2>
-            <Code>{`npm i -g @glypt/cli
-
-glypt search rocket --limit 12     # find icons
-glypt resolve A1 B3                # map atlas refs → ids
-glypt export lucide:home ph:star   # zip with snippets
-glypt atlas --icons lucide:home,ph:star --cols 4`}</Code>
+            <Code>{`# run from this repo
+pnpm glypt search "arrow up right" --limit 12   # find icons
+pnpm glypt atlas --icons lucide:rocket,ph:star --cols 4   # A1 refs
+pnpm glypt resolve A1 B2                         # refs → ids
+pnpm glypt export --icon lucide:rocket -f react -o rocket.tsx`}</Code>
             <p className="mt-3 text-sm text-mute">
-              Point it elsewhere with <code className="rounded bg-paper px-1.5 font-mono text-xs text-ink">GLYPT_API_URL</code>.
+              Lives in <code className="rounded bg-paper px-1.5 font-mono text-xs text-ink">services/cli</code>;
+              ships as <code className="rounded bg-paper px-1.5 font-mono text-xs text-ink">@glypt/cli</code> on npm soon.
             </p>
           </section>
 
@@ -476,10 +476,14 @@ glypt atlas --icons lucide:home,ph:star --cols 4`}</Code>
             <div className="mt-4">
               <Code>{`{
   "mcpServers": {
-    "glypt": { "command": "npx", "args": ["-y", "@glypt/mcp"] }
+    "glypt": { "command": "pnpm", "args": ["--filter", "@glypt/mcp", "start"] }
   }
 }`}</Code>
             </div>
+            <p className="mt-3 text-sm text-mute">
+              Source lives in <code className="rounded bg-paper px-1.5 font-mono text-xs text-ink">services/mcp</code>;
+              run <code className="rounded bg-paper px-1.5 font-mono text-xs text-ink">pnpm mcp</code> from the repo.
+            </p>
           </section>
 
           {/* python */}
