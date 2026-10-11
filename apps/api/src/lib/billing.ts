@@ -15,6 +15,10 @@ export async function recordCheckout(
   );
 }
 
+export async function setUserPlan(userId: string, plan: string): Promise<void> {
+  await getDb().query("UPDATE users SET plan = $1 WHERE id = $2", [plan, userId]);
+}
+
 export type WebhookEvent = {
   id?: string;
   type?: string;
@@ -67,7 +71,7 @@ export async function applyWebhookEvent(
 
   if (!userId || !plan) return { handled: false };
 
-  await db.query("UPDATE users SET plan = $1 WHERE id = $2", [plan, userId]);
+  await setUserPlan(userId, plan);
   if (eventId) {
     await db
       .query("UPDATE payment_events SET user_id = $1, plan = $2 WHERE event_id = $3", [userId, plan, eventId])
