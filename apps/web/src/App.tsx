@@ -10,6 +10,8 @@ const Market = lazy(() => import("./pages/Market"));
 const Docs = lazy(() => import("./pages/Docs"));
 const Shared = lazy(() => import("./pages/Shared"));
 const SignIn = lazy(() => import("./pages/SignIn"));
+const Account = lazy(() => import("./pages/Account"));
+const Reset = lazy(() => import("./pages/Reset"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 function ScrollToTop() {
@@ -42,6 +44,8 @@ export default function App() {
         <Route path="/docs" element={<Suspense fallback={<PageFallback />}><Docs /></Suspense>} />
         <Route path="/s/:token" element={<Suspense fallback={<PageFallback />}><Shared /></Suspense>} />
         <Route path="/signin" element={<Suspense fallback={<PageFallback />}><SignIn /></Suspense>} />
+        <Route path="/account" element={<Suspense fallback={<PageFallback />}><Account /></Suspense>} />
+        <Route path="/reset" element={<Suspense fallback={<PageFallback />}><Reset /></Suspense>} />
         <Route path="*" element={<Suspense fallback={<PageFallback />}><NotFound /></Suspense>} />
       </Routes>
     </>
