@@ -187,6 +187,14 @@ export default function SignIn() {
                   </span>
                 </label>
 
+                {mode === "login" && (
+                  <div className="text-right">
+                    <Link to="/reset" className="font-mono text-[10px] text-mute underline hover:text-ink">
+                      forgot password?
+                    </Link>
+                  </div>
+                )}
+
                 {error && (
                   <p role="alert" className="flex items-center gap-2 rounded-lg bg-berry/10 px-3 py-2 font-mono text-xs font-medium text-berry">
                     <span aria-hidden>✗</span> {error}
