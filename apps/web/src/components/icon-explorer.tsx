@@ -276,59 +276,62 @@ export function IconExplorer({
                 aria-label="Icon results"
               >
                 {icons.map((id) => (
-                  <div
-                    key={id}
-                    role="option"
-                    aria-selected={false}
-                    tabIndex={0}
-                    onClick={() => pick(id)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        pick(id);
-                      }
-                    }}
-                    title={`${id} · click to copy`}
-                    className={clsx(
-                      "group relative grid aspect-square cursor-pointer place-items-center overflow-hidden rounded-lg bg-paper ring-1 ring-line outline-none transition-all",
-                      "hover:-translate-y-0.5 hover:bg-white hover:shadow-[0_8px_16px_-10px_rgba(34,27,21,0.35)] hover:ring-tang",
-                      "focus-visible:ring-2 focus-visible:ring-tang",
-                      compact ? "" : "rounded-xl",
-                    )}
-                  >
-                    <Icon
-                      icon={id}
-                      width={compact ? 18 : 28}
-                      height={compact ? 18 : 28}
-                      className="text-ink transition-transform group-hover:scale-110"
-                    />
-                    {!compact && (
-                      <>
-                        <span
-                          className="absolute top-1.5 left-1.5 size-2 rounded-full"
-                          style={{ backgroundColor: accentFor(id) }}
-                        />
-                        <button
-                          type="button"
-                          onClick={(e) => void pin(id, e)}
-                          aria-label={favorites.includes(id) ? `Unpin ${id}` : `Pin ${id} to stash`}
-                          aria-pressed={favorites.includes(id)}
-                          className={clsx(
-                            "absolute top-1 right-1 grid size-6 place-items-center rounded-full border transition-all active:scale-90",
-                            favorites.includes(id)
-                              ? "border-ink bg-citrine text-ink opacity-100 shadow-[1.5px_1.5px_0_0_var(--color-ink)]"
-                              : "border-line bg-white/90 text-mute opacity-0 group-hover:opacity-100 hover:border-ink hover:text-tang focus-visible:opacity-100",
-                          )}
-                        >
-                          <Icon
-                            icon={favorites.includes(id) ? "ph:push-pin-fill" : "ph:push-pin"}
-                            className="size-3.5"
+                  <div key={id} className="group flex flex-col">
+                    <div
+                      role="option"
+                      aria-selected={false}
+                      tabIndex={0}
+                      onClick={() => pick(id)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          pick(id);
+                        }
+                      }}
+                      title={`${id} · click to copy`}
+                      className={clsx(
+                        "relative grid aspect-square w-full cursor-pointer place-items-center overflow-hidden bg-paper ring-1 ring-line outline-none transition-all",
+                        "group-hover:-translate-y-0.5 group-hover:bg-white group-hover:shadow-[0_8px_16px_-10px_rgba(34,27,21,0.35)] group-hover:ring-tang",
+                        "focus-visible:ring-2 focus-visible:ring-tang",
+                        compact ? "rounded-lg" : "rounded-xl",
+                      )}
+                    >
+                      <Icon
+                        icon={id}
+                        width={compact ? 18 : 28}
+                        height={compact ? 18 : 28}
+                        className="text-ink transition-transform group-hover:scale-110"
+                      />
+                      {!compact && (
+                        <>
+                          <span
+                            className="absolute top-1.5 left-1.5 size-2 rounded-full"
+                            style={{ backgroundColor: accentFor(id) }}
                           />
-                        </button>
-                        <span className="absolute inset-x-1 bottom-1 truncate font-mono text-[9px] tracking-wide text-mute opacity-0 transition-opacity group-hover:opacity-100">
-                          {id.split(":")[1]}
-                        </span>
-                      </>
+                          <button
+                            type="button"
+                            onClick={(e) => void pin(id, e)}
+                            aria-label={favorites.includes(id) ? `Unpin ${id}` : `Pin ${id} to stash`}
+                            aria-pressed={favorites.includes(id)}
+                            className={clsx(
+                              "absolute top-1 right-1 grid size-6 place-items-center rounded-full border transition-all active:scale-90",
+                              favorites.includes(id)
+                                ? "border-ink bg-citrine text-ink opacity-100 shadow-[1.5px_1.5px_0_0_var(--color-ink)]"
+                                : "border-line bg-white/90 text-mute opacity-0 group-hover:opacity-100 hover:border-ink hover:text-tang focus-visible:opacity-100",
+                            )}
+                          >
+                            <Icon
+                              icon={favorites.includes(id) ? "ph:push-pin-fill" : "ph:push-pin"}
+                              className="size-3.5"
+                            />
+                          </button>
+                        </>
+                      )}
+                    </div>
+                    {!compact && (
+                      <span className="mt-1 line-clamp-2 w-full break-all text-center font-mono text-[9px] leading-tight text-mute">
+                        {id.split(":")[1]}
+                      </span>
                     )}
                   </div>
                 ))}
@@ -404,15 +407,13 @@ function StashBoard({
                 type="button"
                 onClick={() => onPick(id)}
                 title={`${id} · click to copy`}
-                className="grid aspect-square w-full place-items-center rounded-xl border-2 border-ink bg-white shadow-[3px_3px_0_0_var(--color-ink)] transition-transform hover:-translate-y-1"
+                className="grid aspect-square w-full place-items-center overflow-hidden rounded-xl border-2 border-ink bg-white shadow-[3px_3px_0_0_var(--color-ink)] transition-transform hover:-translate-y-1"
               >
                 <Icon icon={id} width={34} height={34} className="text-ink" />
-                <span
-                  className="absolute inset-x-2 bottom-1.5 truncate text-center font-mono text-[9px] tracking-wide text-mute"
-                >
-                  {id.split(":")[1]}
-                </span>
               </button>
+              <span className="mt-1 block break-all text-center font-mono text-[9px] leading-tight text-mute">
+                {id.split(":")[1]}
+              </span>
               <button
                 type="button"
                 onClick={() => onUnpin(id)}
