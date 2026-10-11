@@ -483,7 +483,7 @@ export function CollectionsManager({ user }: { user: User }) {
                         title="Copy icon id"
                         className="grid size-6 place-items-center rounded-md bg-sky-soft text-sky transition-colors hover:bg-sky hover:text-white"
                       >
-                        <Icon icon="ph:hash-bold" className="size-3" aria-hidden />
+                        <Icon icon="ph:identification-card-bold" className="size-3" aria-hidden />
                       </button>
                       <button
                         onClick={() => setPendingRemove(id)}
