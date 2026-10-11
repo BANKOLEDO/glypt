@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import { snippetFor } from "@glypt/core";
-import { getJson, postJson, downloadExportZip } from "../lib/api";
+import { getJson, postJson, downloadExportZip, collectPngs } from "../lib/api";
 import type { User } from "../lib/auth";
 
 type Collection = {
@@ -23,6 +23,7 @@ export function CollectionsManager({ user }: { user: User }) {
   const [addId, setAddId] = useState("");
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
+  const [exporting, setExporting] = useState(false);
 
   const active = collections.find((c) => c.id === activeId) ?? null;
   const totalIcons = collections.reduce((sum, c) => sum + (c.count || c.icons.length), 0);
@@ -115,11 +116,20 @@ export function CollectionsManager({ user }: { user: User }) {
 
   async function exportZip() {
     if (!active || !active.icons.length) return flash("Folder is empty");
+    setExporting(true);
     try {
-      await downloadExportZip(active.icons, ["svg"], `${active.name.toLowerCase().replace(/\s+/g, "-")}-glypt-export`);
-      flash("ZIP downloaded");
+      const pngs = await collectPngs(active.icons);
+      await downloadExportZip(
+        active.icons,
+        ["svg", "react"],
+        `${active.name.toLowerCase().replace(/\s+/g, "-")}-glypt-export`,
+        pngs,
+      );
+      flash(`ZIP downloaded (${Object.keys(pngs).length} PNGs)`);
     } catch {
       flash("Export failed");
+    } finally {
+      setExporting(false);
     }
   }
 
@@ -188,11 +198,15 @@ export function CollectionsManager({ user }: { user: User }) {
                 </button>
                 <button
                   onClick={exportZip}
-                  disabled={!active.icons.length}
+                  disabled={!active.icons.length || exporting}
                   className="btn-primary flex-1 !px-4 !py-2.5 disabled:opacity-50 sm:flex-none"
                 >
-                  <Icon icon="ph:download-bold" className="size-4" aria-hidden />
-                  Export ZIP
+                  <Icon
+                    icon={exporting ? "ph:circle-notch-bold" : "ph:download-bold"}
+                    className={`size-4${exporting ? " animate-spin" : ""}`}
+                    aria-hidden
+                  />
+                  {exporting ? "Packing…" : "Export ZIP"}
                 </button>
               </div>
             </div>
