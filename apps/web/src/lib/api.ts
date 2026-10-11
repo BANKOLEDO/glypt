@@ -4,10 +4,16 @@ import { snippetFor, fileExtFor } from "@glypt/core";
 export { snippetFor, fileExtFor };
 export type { Format };
 
+// Never surface raw server/database text to people; keep 5xx generic.
+function errorMessage(status: number, message?: string): string {
+  if (status >= 500) return "Something went wrong on our end. Please try again.";
+  return message ?? `request failed (${status})`;
+}
+
 export async function getJson<T>(path: string): Promise<T> {
   const res = await fetch(path, { credentials: "include" });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error((data as { error?: string }).error ?? `request failed (${res.status})`);
+  if (!res.ok) throw new Error(errorMessage(res.status, (data as { error?: string }).error));
   return data as T;
 }
 
@@ -19,7 +25,7 @@ export async function postJson<T>(path: string, body: unknown): Promise<T> {
     body: JSON.stringify(body),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error((data as { error?: string }).error ?? `request failed (${res.status})`);
+  if (!res.ok) throw new Error(errorMessage(res.status, (data as { error?: string }).error));
   return data as T;
 }
 
@@ -31,7 +37,7 @@ export async function deleteJson<T>(path: string, body?: unknown): Promise<T> {
     body: body === undefined ? undefined : JSON.stringify(body),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error((data as { error?: string }).error ?? `request failed (${res.status})`);
+  if (!res.ok) throw new Error(errorMessage(res.status, (data as { error?: string }).error));
   return data as T;
 }
 
