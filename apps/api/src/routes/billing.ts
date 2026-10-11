@@ -8,7 +8,7 @@ import {
   isPlanId,
   verifyWebhookSignature,
 } from "../lib/bachs";
-import { applyWebhookEvent, recordCheckout, type WebhookEvent } from "../lib/billing";
+import { applyWebhookEvent, recordCheckout, setUserPlan, type WebhookEvent } from "../lib/billing";
 
 export const billingRouter = Router();
 
@@ -54,6 +54,20 @@ billingRouter.post("/checkout", async (req, res) => {
     console.error("glypt billing: checkout failed", err);
     res.status(502).json({ error: "could not start checkout, please try again" });
   }
+});
+
+billingRouter.post("/cancel", async (req, res) => {
+  if (!hasDatabase()) {
+    res.status(503).json({ error: "accounts require a database" });
+    return;
+  }
+  const user = await userFromRequest(req);
+  if (!user) {
+    res.status(401).json({ error: "sign in required" });
+    return;
+  }
+  await setUserPlan(user.id, "free");
+  res.json({ plan: "free" });
 });
 
 billingRouter.post("/webhook", async (req, res) => {
