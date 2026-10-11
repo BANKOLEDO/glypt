@@ -321,7 +321,7 @@ export function IconExplorer({
                       {!compact && (
                         <>
                           <span
-                            className="absolute top-1.5 left-1.5 size-2 rounded-full"
+                            className="absolute top-2 left-2 size-2 rounded-full"
                             style={{ backgroundColor: accentFor(id) }}
                           />
                           <button
@@ -330,25 +330,25 @@ export function IconExplorer({
                             aria-label={favorites.includes(id) ? `Unpin ${id}` : `Pin ${id} to stash`}
                             aria-pressed={favorites.includes(id)}
                             className={clsx(
-                              "absolute top-1 right-1 grid size-6 place-items-center rounded-full border transition-all active:scale-90",
+                              "absolute top-2 right-2 grid size-5 place-items-center rounded-full border transition-all active:scale-90",
                               favorites.includes(id)
                                 ? "border-ink bg-citrine text-ink opacity-100 shadow-[1.5px_1.5px_0_0_var(--color-ink)]"
-                                : "border-line bg-white/90 text-mute opacity-0 group-hover:opacity-100 hover:border-ink hover:text-tang focus-visible:opacity-100",
+                                : "border-line bg-white text-mute opacity-0 shadow-[0_1px_2px_rgba(34,27,21,0.12)] group-hover:opacity-100 hover:border-ink hover:text-tang focus-visible:opacity-100",
                             )}
                           >
                             <Icon
                               icon={favorites.includes(id) ? "ph:push-pin-fill" : "ph:push-pin"}
-                              className="size-3.5"
+                              className="size-3"
                             />
                           </button>
                           <button
                             type="button"
                             onClick={(e) => void copyId(id, e)}
                             aria-label={`Copy id ${id}`}
-                            title="Copy icon id"
-                            className="absolute bottom-1 left-1 grid size-6 place-items-center rounded-full border border-line bg-white/90 text-mute opacity-0 transition-all group-hover:opacity-100 hover:border-ink hover:text-tang focus-visible:opacity-100 active:scale-90 max-md:opacity-100"
+                            title={`Copy id · ${id}`}
+                            className="absolute bottom-2 left-2 grid size-5 place-items-center rounded-full border border-line bg-white text-mute opacity-0 shadow-[0_1px_2px_rgba(34,27,21,0.12)] transition-all group-hover:opacity-100 hover:border-ink hover:text-tang focus-visible:opacity-100 active:scale-90 max-md:opacity-100"
                           >
-                            <Icon icon="ph:hash-bold" className="size-3.5" />
+                            <Icon icon="ph:identification-card-bold" className="size-3" />
                           </button>
                         </>
                       )}
@@ -453,10 +453,10 @@ function StashBoard({
                 type="button"
                 onClick={() => onCopyId(id)}
                 aria-label={`Copy id ${id}`}
-                title="Copy icon id"
-                className="absolute -top-2 -left-2 grid size-6 place-items-center rounded-full border-2 border-ink bg-white text-ink opacity-0 transition-opacity hover:bg-tang hover:text-white group-hover:opacity-100 focus-visible:opacity-100 max-md:opacity-100"
+                title={`Copy id · ${id}`}
+                className="absolute -top-2 -left-2 grid size-6 place-items-center rounded-full border-2 border-ink bg-white text-ink opacity-0 shadow-[1.5px_1.5px_0_0_var(--color-ink)] transition-opacity hover:bg-tang hover:text-white group-hover:opacity-100 focus-visible:opacity-100 max-md:opacity-100"
               >
-                <Icon icon="ph:hash-bold" className="size-3" />
+                <Icon icon="ph:identification-card-bold" className="size-3" />
               </button>
             </div>
           );
