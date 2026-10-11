@@ -50,18 +50,30 @@ export default function Account() {
     <div className="flex min-h-dvh flex-col">
       <Nav />
       <main className="mx-auto w-full max-w-4xl flex-1 px-5 py-10">
-        <header className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="label-mono">your workspace</p>
-            <h1 className="h-display mt-2 text-3xl sm:text-4xl">
-              ACCOUNT<span className="text-tang">.</span>
-            </h1>
+        {user && (
+          <div className="relative">
+            <span className="ml-5 inline-flex items-center gap-2 rounded-t-xl border-2 border-b-0 border-ink bg-tang px-4 py-1.5 font-mono text-[11px] font-bold tracking-wide text-white uppercase">
+              <Icon icon="ph:identification-card-bold" className="size-4" aria-hidden />
+              account
+            </span>
+            <div className="relative -mt-0.5 flex flex-wrap items-center gap-4 rounded-2xl rounded-tl-none border-2 border-ink bg-white p-5 shadow-[6px_6px_0_0_var(--color-ink)]">
+              <span className="grid size-16 shrink-0 place-items-center rounded-2xl bg-tang font-display text-3xl font-bold text-white shadow-[4px_4px_0_0_var(--color-ink)]">
+                {(user.name?.trim()?.[0] ?? user.email[0] ?? "?").toUpperCase()}
+              </span>
+              <div className="min-w-0">
+                <p className="truncate font-display text-2xl font-bold text-ink">
+                  {user.name?.trim() || "Unnamed maker"}
+                </p>
+                <p className="truncate font-mono text-xs text-mute">{user.email}</p>
+              </div>
+              <span className="sticker ml-auto bg-citrine text-ink">{user.plan} plan</span>
+              <Link to="/dashboard" className="btn-ghost !py-2 text-sm">
+                <Icon icon="ph:squares-four-bold" className="size-4" aria-hidden />
+                Dashboard
+              </Link>
+            </div>
           </div>
-          <Link to="/dashboard" className="btn-ghost !py-2 text-sm">
-            <Icon icon="ph:squares-four-bold" className="size-4" aria-hidden />
-            Dashboard
-          </Link>
-        </header>
+        )}
 
         <div
           role="tablist"
@@ -130,6 +142,19 @@ function Note({ tone = "info", children }: { tone?: "info" | "good" | "bad"; chi
   );
 }
 
+const PANEL = "relative overflow-hidden rounded-2xl border-2 border-ink p-6 shadow-[6px_6px_0_0_var(--color-ink)]";
+
+function PanelHead({ icon, title, accent = "bg-tang" }: { icon: string; title: string; accent?: string }) {
+  return (
+    <div className="mb-4 flex items-center gap-2.5">
+      <span className={clsx("grid size-7 place-items-center rounded-lg text-white", accent)}>
+        <Icon icon={icon} className="size-4" aria-hidden />
+      </span>
+      <h2 className="font-mono text-[11px] font-bold tracking-[0.14em] text-ink uppercase">{title}</h2>
+    </div>
+  );
+}
+
 function ProfilePanel({
   user,
   onSave,
@@ -150,28 +175,50 @@ function ProfilePanel({
     const err = await onSave(name.trim());
     setBusy(false);
     if (err) setError(err);
-    else flash("Profile updated");
+    else flash("Name updated");
   }
 
   return (
-    <form onSubmit={submit} className="card space-y-4 p-6">
-      <Field label="display name">
-        <input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Ada Lovelace"
-          autoComplete="name"
-          className="input"
+    <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_248px]">
+      <form onSubmit={submit} className={clsx(PANEL, "bg-white")}>
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -top-12 -right-12 size-36 rotate-12 rounded-[2rem] border-4 border-tang-soft"
         />
-      </Field>
-      <Field label="email" hint="Email changes are not supported yet.">
-        <input value={user.email} readOnly disabled className="input cursor-not-allowed bg-paper text-mute" />
-      </Field>
-      {error && <Note tone="bad">{error}</Note>}
-      <button type="submit" disabled={busy} className="btn-primary disabled:opacity-60">
-        {busy ? "Saving…" : "Save profile"}
-      </button>
-    </form>
+        <PanelHead icon="ph:pencil-simple-bold" title="display name" />
+        <label className="block">
+          <span className="sr-only">Display name</span>
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Your name"
+            autoComplete="name"
+            className="w-full border-0 bg-transparent p-0 font-display text-3xl font-bold text-ink placeholder:text-mute/40 focus:outline-none"
+          />
+        </label>
+        <span aria-hidden className="mt-3 block h-1 w-40 rounded-full bg-gradient-to-r from-tang to-citrine" />
+        <p className="mt-3 font-mono text-[10px] text-mute">Shown on your dashboard and share links.</p>
+        {error && (
+          <div className="mt-4">
+            <Note tone="bad">{error}</Note>
+          </div>
+        )}
+        <div className="mt-5">
+          <button type="submit" disabled={busy} className="btn-primary disabled:opacity-60">
+            {busy ? "Saving…" : "Save name"}
+          </button>
+        </div>
+      </form>
+
+      <aside className={clsx(PANEL, "bg-paper")}>
+        <PanelHead icon="ph:envelope-simple-bold" title="sign-in email" accent="bg-sky" />
+        <p className="break-all font-mono text-sm font-medium text-ink">{user.email}</p>
+        <div className="mt-4 flex items-center gap-2 rounded-lg border border-dashed border-line bg-white px-3 py-2">
+          <Icon icon="ph:lock-simple-bold" className="size-4 text-mute" aria-hidden />
+          <span className="font-mono text-[10px] text-mute">locked for now</span>
+        </div>
+      </aside>
+    </div>
   );
 }
 
@@ -213,7 +260,8 @@ function PasswordPanel({
   }
 
   return (
-    <form onSubmit={submit} className="card space-y-4 p-6">
+    <form onSubmit={submit} className={clsx(PANEL, "max-w-xl space-y-4 bg-white")}>
+      <PanelHead icon="ph:lock-key-bold" title="change password" />
       <Field label="current password">
         <input type="password" value={current} onChange={(e) => setCurrent(e.target.value)} autoComplete="current-password" required className="input" />
       </Field>
@@ -315,29 +363,35 @@ function KeysPanel({ flash }: { flash: (m: string) => void }) {
         </div>
       )}
 
-      <form onSubmit={create} className="card flex flex-wrap items-end gap-3 p-5">
-        <div className="min-w-48 flex-1">
-          <Field label="new key name">
-            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="CI pipeline" className="input" />
-          </Field>
+      <form onSubmit={create} className={clsx(PANEL, "bg-white")}>
+        <PanelHead icon="ph:key-bold" title="create an API key" />
+        <div className="flex flex-wrap items-end gap-3">
+          <div className="min-w-48 flex-1">
+            <Field label="key name">
+              <input value={name} onChange={(e) => setName(e.target.value)} placeholder="CI pipeline" className="input" />
+            </Field>
+          </div>
+          <button type="submit" disabled={busy} className="btn-primary disabled:opacity-60">
+            <Icon icon="ph:plus-bold" className="size-4" aria-hidden />
+            {busy ? "Creating…" : "Create key"}
+          </button>
         </div>
-        <button type="submit" disabled={busy} className="btn-primary disabled:opacity-60">
-          <Icon icon="ph:plus-bold" className="size-4" aria-hidden />
-          {busy ? "Creating…" : "Create key"}
-        </button>
       </form>
 
       {error && <Note tone="bad">{error}</Note>}
 
-      <div className="card overflow-hidden">
+      <div className="overflow-hidden rounded-2xl border-2 border-ink bg-white shadow-[6px_6px_0_0_var(--color-ink)]">
+        <div className="px-6 pt-5">
+          <PanelHead icon="ph:list-magnifying-glass-bold" title="your keys" />
+        </div>
         {loaded && keys.length === 0 ? (
-          <p className="p-6 text-center font-mono text-xs text-mute">
+          <p className="px-6 pb-6 text-center font-mono text-xs text-mute">
             No keys yet. Create one to use the Glypt API from your own tools.
           </p>
         ) : (
           <ul className="divide-y divide-line">
             {keys.map((key) => (
-              <li key={key.id} className="flex items-center gap-3 p-4">
+              <li key={key.id} className="flex items-center gap-3 px-6 py-4">
                 <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-tang-soft text-tang-hi">
                   <Icon icon="ph:key-bold" className="size-4" aria-hidden />
                 </span>
