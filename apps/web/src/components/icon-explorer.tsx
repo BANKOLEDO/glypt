@@ -346,9 +346,9 @@ export function IconExplorer({
                             onClick={(e) => void copyId(id, e)}
                             aria-label={`Copy id ${id}`}
                             title={`Copy id · ${id}`}
-                            className="absolute bottom-2 left-2 grid size-5 place-items-center rounded-full border border-line bg-white text-mute opacity-0 shadow-[0_1px_2px_rgba(34,27,21,0.12)] transition-all group-hover:opacity-100 hover:border-ink hover:text-tang focus-visible:opacity-100 active:scale-90 max-md:opacity-100"
+                            className="absolute bottom-2 left-2 grid h-5 min-w-5 place-items-center rounded-md border border-line bg-white px-1 font-mono text-[8px] font-bold tracking-wide text-mute uppercase opacity-0 shadow-[0_1px_2px_rgba(34,27,21,0.12)] transition-all group-hover:opacity-100 hover:border-ink hover:text-tang focus-visible:opacity-100 active:scale-90 max-md:opacity-100"
                           >
-                            <Icon icon="ph:identification-card-bold" className="size-3" />
+                            id
                           </button>
                         </>
                       )}
@@ -454,9 +454,9 @@ function StashBoard({
                 onClick={() => onCopyId(id)}
                 aria-label={`Copy id ${id}`}
                 title={`Copy id · ${id}`}
-                className="absolute -top-2 -left-2 grid size-6 place-items-center rounded-full border-2 border-ink bg-white text-ink opacity-0 shadow-[1.5px_1.5px_0_0_var(--color-ink)] transition-opacity hover:bg-tang hover:text-white group-hover:opacity-100 focus-visible:opacity-100 max-md:opacity-100"
+                className="absolute -top-2 -left-2 grid h-5 min-w-5 place-items-center rounded-md border-2 border-ink bg-white px-1 font-mono text-[8px] font-bold tracking-wide text-ink uppercase opacity-0 shadow-[1.5px_1.5px_0_0_var(--color-ink)] transition-opacity hover:bg-tang hover:text-white group-hover:opacity-100 focus-visible:opacity-100 max-md:opacity-100"
               >
-                <Icon icon="ph:identification-card-bold" className="size-3" />
+                id
               </button>
             </div>
           );
