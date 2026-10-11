@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import { AnimatePresence, motion } from "motion/react";
 import Nav from "../components/nav";
@@ -8,6 +9,8 @@ import HeroMockup from "../components/hero-mockup";
 import AtlasBoard from "../components/atlas-board";
 import CliDemo from "../components/cli-demo";
 import LottieMark from "../components/lottie-mark";
+import { useAuth } from "../lib/auth";
+import { startCheckout, type PaidPlan } from "../lib/billing";
 
 const COLLECTIONS = [
   "lucide", "heroicons", "phosphor", "tabler", "material-design-icons",
@@ -47,18 +50,25 @@ const PERSONAS = [
 
 const PLANS = [
   {
-    name: "Free", price: "$0", fg: "#00875F",
+    name: "Free", price: "$0", id: null, fg: "#00875F",
     items: ["100 searches/mo", "10 saved assets", "Community support"],
   },
   {
-    name: "Pro", price: "$19", fg: "#E8480D", featured: true,
+    name: "Pro", price: "$19", id: "pro", fg: "#E8480D", featured: true,
     items: ["Unlimited searches", "Unlimited saved assets", "CLI + API access", "Priority support"],
   },
   {
-    name: "Team", price: "$49", fg: "#C81E74",
+    name: "Team", price: "$49", id: "team", fg: "#C81E74",
     items: ["5 seats included", "Shared brand libraries", "Role-based permissions", "SSO & audit logs"],
   },
-];
+] satisfies {
+  name: string;
+  price: string;
+  id: "pro" | "team" | null;
+  fg: string;
+  featured?: boolean;
+  items: string[];
+}[];
 
 const FLOATERS = [
   { icon: "ph:paint-brush-broad-fill", cls: "-top-5 -left-5 size-14", tilt: "-8deg", late: false },
@@ -67,6 +77,30 @@ const FLOATERS = [
 ];
 
 export default function Home() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [busyPlan, setBusyPlan] = useState<PaidPlan | null>(null);
+  const [payError, setPayError] = useState<string | null>(null);
+
+  async function choosePlan(id: PaidPlan | null) {
+    setPayError(null);
+    if (!id) {
+      navigate(user ? "/dashboard" : "/signin?mode=register");
+      return;
+    }
+    if (!user) {
+      navigate("/signin?mode=register");
+      return;
+    }
+    setBusyPlan(id);
+    try {
+      window.location.href = await startCheckout(id);
+    } catch (err) {
+      setPayError(err instanceof Error ? err.message : "could not start checkout");
+      setBusyPlan(null);
+    }
+  }
+
   return (
     <div className="min-h-dvh overflow-x-clip">
       <Nav />
@@ -414,16 +448,23 @@ export default function Home() {
                     </li>
                   ))}
                 </ul>
-                <Link
-                  to="/signin?mode=register"
-                  className={`${plan.featured ? "btn-primary" : "btn-ghost"} mt-6 w-full`}
+                <button
+                  type="button"
+                  onClick={() => void choosePlan(plan.id)}
+                  disabled={busyPlan === plan.id}
+                  className={`${plan.featured ? "btn-primary" : "btn-ghost"} mt-6 w-full disabled:opacity-60`}
                 >
-                  Choose {plan.name.toLowerCase()}
-                </Link>
+                  {busyPlan === plan.id ? "Starting…" : `Choose ${plan.name.toLowerCase()}`}
+                </button>
               </div>
             </Reveal>
           ))}
         </div>
+        {payError && (
+          <p className="mt-4 rounded-lg bg-berry/10 px-3 py-2 font-mono text-xs font-medium text-berry">
+            {payError}
+          </p>
+        )}
       </section>
 
       {/* cta */}
