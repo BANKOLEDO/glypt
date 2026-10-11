@@ -457,7 +457,7 @@ export function CollectionsManager({ user }: { user: User }) {
                 <div
                   key={id}
                   className="group overflow-hidden rounded-xl bg-paper ring-1 ring-line transition-all hover:-translate-y-0.5 hover:shadow-[0_10px_22px_-14px_rgba(34,27,21,0.4)]"
-                  title={`${id} · copy: react snippet · del: remove from folder`}
+                  title={`${id} · copy snippet · copy id · remove from folder`}
                 >
                   <div className="grid aspect-square place-items-center bg-white p-3">
                     <Icon icon={id} width={36} height={36} aria-hidden />
@@ -474,6 +474,16 @@ export function CollectionsManager({ user }: { user: User }) {
                         className="grid size-6 place-items-center rounded-md bg-mint-soft text-mint transition-colors hover:bg-mint hover:text-white"
                       >
                         <Icon icon="ph:copy-bold" className="size-3" aria-hidden />
+                      </button>
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(id).then(() => flash("Copied id"));
+                        }}
+                        aria-label={`Copy id ${id}`}
+                        title="Copy icon id"
+                        className="grid size-6 place-items-center rounded-md bg-sky-soft text-sky transition-colors hover:bg-sky hover:text-white"
+                      >
+                        <Icon icon="ph:hash-bold" className="size-3" aria-hidden />
                       </button>
                       <button
                         onClick={() => setPendingRemove(id)}
