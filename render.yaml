@@ -16,3 +16,9 @@ services:
       # Set after the Vercel site exists, e.g. https://glypt.vercel.app
       - key: WEB_ORIGIN
         sync: false
+      # Bachs payments: secret key (sk_sandbox_... / sk_live_...) and the
+      # endpoint's signing secret from the Bachs developer portal.
+      - key: BACHS_API_KEY
+        sync: false
+      - key: BACHS_WEBHOOK_SECRET
+        sync: false
