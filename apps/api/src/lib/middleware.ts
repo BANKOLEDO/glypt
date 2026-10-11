@@ -26,6 +26,7 @@ export async function attachIdentity(req: Request, res: Response, next: NextFunc
       const did = newDeviceId();
       req.identity = { userId: did, plan: "free", authenticated: false };
       req.newDeviceId = did;
+      issueDeviceCookie(res, req);
     }
     next();
   } catch (err) {
