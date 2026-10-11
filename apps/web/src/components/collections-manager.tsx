@@ -154,50 +154,108 @@ export function CollectionsManager({ user }: { user: User }) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
+      {/* active folder hero */}
+      {active ? (
+        <div className="card relative overflow-hidden p-0">
+          <div className="absolute inset-x-0 top-0 z-10 grid h-1.5 grid-cols-5" aria-hidden>
+            <div className="bg-tang" />
+            <div className="bg-citrine" />
+            <div className="bg-mint" />
+            <div className="bg-sky" />
+            <div className="bg-berry" />
+          </div>
+          <div className="relative p-5 pt-7 sm:p-6 sm:pt-8">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0">
+                <p className="label-mono">active folder</p>
+                <div className="mt-2 flex items-center gap-2.5">
+                  <span className="size-3.5 shrink-0 rounded-full" style={{ backgroundColor: active.color }} />
+                  <h2 className="truncate font-display text-2xl font-bold text-ink sm:text-3xl">{active.name}</h2>
+                </div>
+                <p className="mt-1.5 font-mono text-[11px] tracking-[0.14em] text-mute uppercase">
+                  {active.icons.length} {active.icons.length === 1 ? "asset" : "assets"} ready to ship
+                </p>
+              </div>
+              <div className="flex w-full gap-2 sm:w-auto">
+                <button
+                  onClick={createShare}
+                  disabled={!active.icons.length}
+                  className="btn-ghost flex-1 !px-4 !py-2.5 disabled:opacity-50 sm:flex-none"
+                >
+                  <Icon icon="ph:link-bold" className="size-4" aria-hidden />
+                  Share link
+                </button>
+                <button
+                  onClick={exportZip}
+                  disabled={!active.icons.length}
+                  className="btn-primary flex-1 !px-4 !py-2.5 disabled:opacity-50 sm:flex-none"
+                >
+                  <Icon icon="ph:download-bold" className="size-4" aria-hidden />
+                  Export ZIP
+                </button>
+              </div>
+            </div>
+
+            {shareUrl && (
+              <div className="mt-4 flex items-center gap-2 rounded-xl bg-paper p-3 ring-1 ring-line">
+                <Icon icon="ph:link-simple-bold" className="size-4 shrink-0 text-tang" aria-hidden />
+                <code className="min-w-0 flex-1 font-mono text-[11px] text-tang-hi break-all">{shareUrl}</code>
+                <button
+                  onClick={copyShareUrl}
+                  aria-label="Copy share link"
+                  title="Copy share link"
+                  className="grid size-7 shrink-0 place-items-center rounded-md bg-white text-mute ring-1 ring-line transition-colors hover:text-tang"
+                >
+                  <Icon icon="ph:copy-bold" className="size-3.5" aria-hidden />
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      ) : (
+        <div className="card flex flex-col items-center gap-2 p-8 text-center">
+          <span className="grid size-12 place-items-center rounded-2xl bg-tang-soft text-tang">
+            <Icon icon="ph:folder-plus-bold" className="size-6" aria-hidden />
+          </span>
+          <p className="font-display text-lg font-bold text-ink">Create your first brand folder</p>
+          <p className="max-w-sm text-sm leading-relaxed text-mute">
+            Folders keep icons, palettes and exports in one place, ready to share with your team.
+          </p>
+        </div>
+      )}
+
       {/* stats */}
-      <div className="grid grid-cols-3 gap-2 sm:gap-4" role="list" aria-label="Workspace summary">
-        <div className="card p-3 sm:p-4">
-          <div className="flex items-center gap-2.5">
-            <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-tang-soft text-tang sm:size-10">
-              <Icon icon="ph:folder-simple-bold" className="size-4 sm:size-5" aria-hidden />
-            </span>
-            <span className="min-w-0">
-              <span className="block font-display text-lg leading-none font-bold text-ink sm:text-xl">{collections.length}</span>
-              <span className="mt-1 block truncate font-mono text-[9px] tracking-widest text-mute uppercase sm:text-[10px]">folders</span>
-            </span>
-          </div>
+      <div className="grid grid-cols-3 gap-2.5 sm:gap-4" role="list" aria-label="Workspace summary">
+        <div className="rounded-2xl bg-tang-soft p-3.5 sm:p-4">
+          <span className="grid size-8 place-items-center rounded-xl bg-white text-tang sm:size-9">
+            <Icon icon="ph:folder-simple-bold" className="size-4" aria-hidden />
+          </span>
+          <p className="mt-3 font-display text-2xl leading-none font-bold text-ink sm:text-3xl">{collections.length}</p>
+          <p className="mt-1.5 font-mono text-[9px] tracking-[0.14em] text-ink/60 uppercase sm:text-[10px]">folders</p>
         </div>
-        <div className="card p-3 sm:p-4">
-          <div className="flex items-center gap-2.5">
-            <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-mint-soft text-mint sm:size-10">
-              <Icon icon="ph:cube-bold" className="size-4 sm:size-5" aria-hidden />
-            </span>
-            <span className="min-w-0">
-              <span className="block font-display text-lg leading-none font-bold text-ink sm:text-xl">{totalIcons}</span>
-              <span className="mt-1 block truncate font-mono text-[9px] tracking-widest text-mute uppercase sm:text-[10px]">icons saved</span>
-            </span>
-          </div>
+        <div className="rounded-2xl bg-mint-soft p-3.5 sm:p-4">
+          <span className="grid size-8 place-items-center rounded-xl bg-white text-mint sm:size-9">
+            <Icon icon="ph:cube-bold" className="size-4" aria-hidden />
+          </span>
+          <p className="mt-3 font-display text-2xl leading-none font-bold text-ink sm:text-3xl">{totalIcons}</p>
+          <p className="mt-1.5 font-mono text-[9px] tracking-[0.14em] text-ink/60 uppercase sm:text-[10px]">icons saved</p>
         </div>
-        <div className="card p-3 sm:p-4">
-          <div className="flex items-center gap-2.5">
-            <span
-              className="grid size-9 shrink-0 place-items-center rounded-xl font-brand text-xs font-bold text-white sm:size-10"
-              style={{ backgroundColor: active?.color ?? "#E8A20C" }}
-            >
-              {(active?.name ?? "—").slice(0, 1).toUpperCase()}
-            </span>
-            <span className="min-w-0">
-              <span className="block truncate font-display text-sm leading-none font-bold text-ink sm:text-xl">
-                {active?.name ?? "—"}
-              </span>
-              <span className="mt-1 block truncate font-mono text-[9px] tracking-widest text-mute uppercase sm:text-[10px]">active folder</span>
-            </span>
-          </div>
+        <div className="rounded-2xl bg-citrine-soft p-3.5 sm:p-4">
+          <span
+            className="grid size-8 place-items-center rounded-xl bg-white font-brand text-[11px] font-bold sm:size-9"
+            style={{ color: active?.color ?? "#9A6A00" }}
+          >
+            {(active?.name ?? "—").slice(0, 1).toUpperCase()}
+          </span>
+          <p className="mt-3 truncate font-display text-base leading-tight font-bold text-ink sm:text-lg">
+            {active?.name ?? "—"}
+          </p>
+          <p className="mt-1.5 font-mono text-[9px] tracking-[0.14em] text-ink/60 uppercase sm:text-[10px]">active folder</p>
         </div>
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-[320px_1fr]">
+      <div className="grid gap-5 lg:grid-cols-[300px_1fr]">
         {/* folders */}
         <div className="card flex flex-col overflow-hidden p-4">
           <div className="flex items-center justify-between">
@@ -253,10 +311,7 @@ export function CollectionsManager({ user }: { user: User }) {
               aria-label="New folder name"
               className="w-full rounded-lg border-2 border-line bg-white px-3 py-2 font-mono text-xs text-ink placeholder:text-mute/60 focus:border-tang focus:outline-none"
             />
-            <button
-              type="submit"
-              className="btn-primary w-full !rounded-lg !px-3 !py-2 text-xs"
-            >
+            <button type="submit" className="btn-primary w-full !rounded-lg !px-3 !py-2 text-xs">
               <Icon icon="ph:plus-bold" className="size-4" aria-hidden />
               Create folder
             </button>
@@ -282,82 +337,42 @@ export function CollectionsManager({ user }: { user: User }) {
           </form>
 
           {active && active.icons.length > 0 ? (
-            <>
-              <div className="grid grid-cols-[repeat(auto-fill,minmax(110px,1fr))] gap-2 min-[420px]:grid-cols-[repeat(auto-fill,minmax(130px,1fr))]">
-                {active.icons.map((id) => (
-                  <div
-                    key={id}
-                    className="group overflow-hidden rounded-xl bg-paper ring-1 ring-line"
-                    title={`${id} · copy: react snippet · del: remove from folder`}
-                  >
-                    <div className="grid aspect-square place-items-center bg-white p-3">
-                      <Icon icon={id} width={36} height={36} aria-hidden />
-                    </div>
-                    <div className="flex items-center justify-between gap-1 px-2 py-1.5">
-                      <p className="min-w-0 flex-1 truncate font-mono text-[10px] text-mute">{id.split(":")[1]}</p>
-                      <span className="flex shrink-0 gap-1">
-                        <button
-                          onClick={() => {
-                            navigator.clipboard.writeText(snippetFor(id, "react")).then(() => flash("Copied"));
-                          }}
-                          aria-label={`Copy ${id}`}
-                          title="Copy react snippet"
-                          className="grid size-6 place-items-center rounded-md bg-mint-soft text-mint transition-colors hover:bg-mint hover:text-white"
-                        >
-                          <Icon icon="ph:copy-bold" className="size-3" aria-hidden />
-                        </button>
-                        <button
-                          onClick={() => removeIcon(id)}
-                          aria-label={`Remove ${id}`}
-                          title="Remove from folder"
-                          className="grid size-6 place-items-center rounded-md bg-berry/10 text-berry transition-colors hover:bg-berry hover:text-white"
-                        >
-                          <Icon icon="ph:trash-bold" className="size-3" aria-hidden />
-                        </button>
-                      </span>
-                    </div>
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(110px,1fr))] gap-2 sm:grid-cols-[repeat(auto-fill,minmax(130px,1fr))]">
+              {active.icons.map((id) => (
+                <div
+                  key={id}
+                  className="group overflow-hidden rounded-xl bg-paper ring-1 ring-line transition-all hover:-translate-y-0.5 hover:shadow-[0_10px_22px_-14px_rgba(34,27,21,0.4)]"
+                  title={`${id} · copy: react snippet · del: remove from folder`}
+                >
+                  <div className="grid aspect-square place-items-center bg-white p-3">
+                    <Icon icon={id} width={36} height={36} aria-hidden />
                   </div>
-                ))}
-              </div>
-
-              <div className="card flex flex-col gap-3 border-l-4 p-4 sm:flex-row sm:items-center" style={{ borderLeftColor: active?.color ?? "#E8A20C" }}>
-                <div className="min-w-0 flex-1">
-                  <p className="font-display text-sm font-bold text-ink">
-                    {active.name}
-                    <span className="ml-2 rounded-full bg-paper px-2 py-0.5 font-mono text-[10px] text-mute">
-                      {active.icons.length} assets
+                  <div className="flex items-center justify-between gap-1 px-2 py-1.5">
+                    <p className="min-w-0 flex-1 truncate font-mono text-[10px] text-mute">{id.split(":")[1]}</p>
+                    <span className="flex shrink-0 gap-1">
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(snippetFor(id, "react")).then(() => flash("Copied"));
+                        }}
+                        aria-label={`Copy ${id}`}
+                        title="Copy react snippet"
+                        className="grid size-6 place-items-center rounded-md bg-mint-soft text-mint transition-colors hover:bg-mint hover:text-white"
+                      >
+                        <Icon icon="ph:copy-bold" className="size-3" aria-hidden />
+                      </button>
+                      <button
+                        onClick={() => removeIcon(id)}
+                        aria-label={`Remove ${id}`}
+                        title="Remove from folder"
+                        className="grid size-6 place-items-center rounded-md bg-berry/10 text-berry transition-colors hover:bg-berry hover:text-white"
+                      >
+                        <Icon icon="ph:trash-bold" className="size-3" aria-hidden />
+                      </button>
                     </span>
-                  </p>
-                  <p className="mt-1 text-xs leading-relaxed text-mute">
-                    Copy any tile in one click, or ship the whole folder as a ZIP package.
-                  </p>
+                  </div>
                 </div>
-                <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-                  <button onClick={createShare} disabled={!active?.icons.length} className="btn-ghost w-full disabled:opacity-50 sm:w-auto !px-4 !py-2.5">
-                    <Icon icon="ph:link-bold" className="size-4" aria-hidden />
-                    Share link
-                  </button>
-                  <button onClick={exportZip} disabled={!active?.icons.length} className="btn-primary w-full disabled:opacity-50 sm:w-auto !px-4 !py-2.5">
-                    <Icon icon="ph:download-bold" className="size-4" aria-hidden />
-                    Export ZIP
-                  </button>
-                </div>
-              </div>
-              {shareUrl && (
-                <div className="card flex items-center gap-2 bg-paper !ring-0 p-3">
-                  <Icon icon="ph:link-simple-bold" className="size-4 shrink-0 text-tang" aria-hidden />
-                  <code className="min-w-0 flex-1 font-mono text-[11px] text-tang-hi break-all">{shareUrl}</code>
-                  <button
-                    onClick={copyShareUrl}
-                    aria-label="Copy share link"
-                    title="Copy share link"
-                    className="grid size-7 shrink-0 place-items-center rounded-md bg-white text-mute ring-1 ring-line transition-colors hover:text-tang"
-                  >
-                    <Icon icon="ph:copy-bold" className="size-3.5" aria-hidden />
-                  </button>
-                </div>
-              )}
-            </>
+              ))}
+            </div>
           ) : (
             <div className="card grid place-items-center gap-3 p-10 text-center">
               <span className="grid size-12 place-items-center rounded-full bg-paper text-mute">
